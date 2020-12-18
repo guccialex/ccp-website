@@ -18,7 +18,7 @@ const gamepassword = urlParams.get("password");
 
 
 //these are gotten from outside or the calling function
-let websocketaddress = 'ws://localhost:'+ portnumber;
+let websocketaddress = 'ws://0.0.0.0:'+ portnumber;
 
 
 //get the port and the password from the query string
@@ -38,6 +38,8 @@ run();
 async function run() {
     
     await init();
+    
+    console.log(websocketaddress);
     
     
     //create a websocket connection with the server
