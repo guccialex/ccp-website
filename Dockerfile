@@ -1,12 +1,12 @@
 FROM rust
 
-RUN cargo install wasm-pack
+#RUN cargo install wasm-pack
 
-WORKDIR /home
+#WORKDIR /home
 
-COPY . .
+#COPY . .
 
-EXPOSE 8080
-EXPOSE 8082
+#EXPOSE 8080
+#EXPOSE 8082
 
-CMD ./runeverything.sh
+#CMD ./runeverything.sh

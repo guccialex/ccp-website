@@ -4,41 +4,6 @@
 
 
 
-//connect to the matchmaker websocket server
-let websocketaddress = 'ws://127.0.0.1:3050';
-
-
-let socket = new WebSocket( websocketaddress );
-    
-    
-socket.onopen = function (event) {
-    
-    console.log("connected to the matchmaking server");
-};
-
-
-socket.onmessage = function (event){
-
-
-    let receiveddata = JSON.parse(event.data);
-
-    if (receiveddata.gameport != null && receiveddata.gamepassword != null){
-
-
-        
-        let gamedataserver = "http://0.0.0.0:8000/index.html";
-
-        let portinfo = "?port=" + receiveddata.gameport;
-
-        let passwordinfo = "&password=" + receiveddata.gamepassword;
-
-
-        window.location.href = gamedataserver + portinfo + passwordinfo;
-    }
-
-
-
-}
 
 
 
@@ -46,7 +11,23 @@ socket.onmessage = function (event){
 function ConnectToPublicGame() {
     document.getElementById("demo").innerHTML = "connecting to public game";
 
-    socket.send(  JSON.stringify("joinpublicgame")  );
+
+    theUrl = "http://35.222.154.21:8000/";
+
+    
+    var xmlHttp = new XMLHttpRequest();
+    
+    
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            callback(xmlHttp.responseText);
+    }
+
+    xmlHttp.open("GET", theUrl, true); // true for asynchronous 
+    xmlHttp.send(null);
+    
+
+    console.log("connecting to public game");
 }
 
 
@@ -55,16 +36,15 @@ function ConnectToPrivateGame() {
 
     let password = document.getElementById("gamepassword").value;
 
-    let tosend =  JSON.stringify({joinprivategame: password})  ;
-
-    socket.send(tosend);
+    console.log("connect to private game" + password);
 }
 
 
 function CreatePrivateGame() {
     document.getElementById("demo").innerHTML = "creating private game";
 
-    socket.send(JSON.stringify("createprivategame"));
+    console.log("creating private game");
+
 }
 
 

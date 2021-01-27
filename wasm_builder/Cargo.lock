@@ -459,6 +459,7 @@ dependencies = [
 name = "physicsengine"
 version = "0.1.0"
 dependencies = [
+ "bincode",
  "nalgebra",
  "ncollide3d",
  "nphysics3d",

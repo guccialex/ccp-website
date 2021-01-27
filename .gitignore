@@ -1,4 +1,5 @@
-/chesscheckersgame/wasmfiles/
+#this is needed to be in the git repository to build for the google image repository and deployment
+#/chesscheckersgame/wasmfiles/
 
 /chesspoker_package/
 
