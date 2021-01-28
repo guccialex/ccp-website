@@ -5,29 +5,33 @@
 
 
 
+let matchmakerurl = "http://35.239.40.242/matchmaker-api/";
+let gamefilesurl = "http://35.239.40.242/static-game-files/";
+
+let xmlHttp = new XMLHttpRequest();
+
+
+
+xmlHttp.onreadystatechange = function() {
+    console.log(xhttp.responseText);
+}
+
 
 
 
 function ConnectToPublicGame() {
+
     document.getElementById("demo").innerHTML = "connecting to public game";
 
-
-    theUrl = "http://35.222.154.21:8000/";
-
     
-    var xmlHttp = new XMLHttpRequest();
-    
-    
-    xmlHttp.onreadystatechange = function() { 
-        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
-            callback(xmlHttp.responseText);
-    }
-
-    xmlHttp.open("GET", theUrl, true); // true for asynchronous 
-    xmlHttp.send(null);
+    xmlHttp.open("GET", matchmakerurl, true); // true for asynchronous 
+    xmlHttp.send();
     
 
+    /*
     console.log("connecting to public game");
+    console.log(gamefilesurl);
+    */
 }
 
 
