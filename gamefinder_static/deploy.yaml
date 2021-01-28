@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  #f stands for "files"
+  name: s-game-finder-deployment
+  
+  labels:
+    podtype: s-game-finder
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      podtype: s-game-finder
+
+  template:
+
+    metadata:
+      labels:
+        podtype: s-game-finder
+    spec:
+      containers:
+        - name: s-game-finder
+          image: gcr.io/level-unfolding-299521/github.com/guccialex/ccp-website@sha256:29b8a40ffdf164b6d100065c5c92eacbbadb3b11a5ec8b5ed48820b2f3d9fe70
+          ports:
+            - name: s-game-finder
+              containerPort: 8000
+              protocol: TCP
