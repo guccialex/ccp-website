@@ -4,9 +4,10 @@
 
 
 
-
+let publicgamerequest = "http://35.239.40.242/matchmaker-api/join_public_game";
 let matchmakerurl = "http://35.239.40.242/matchmaker-api/";
 let gamefilesurl = "http://35.239.40.242/static-game-files/";
+
 
 let xmlHttp = new XMLHttpRequest();
 
@@ -14,7 +15,7 @@ let xmlHttp = new XMLHttpRequest();
 
 xmlHttp.onreadystatechange = function() {
     console.log(xhttp.responseText);
-}
+};
 
 
 
@@ -24,7 +25,7 @@ function ConnectToPublicGame() {
     document.getElementById("demo").innerHTML = "connecting to public game";
 
     
-    xmlHttp.open("GET", matchmakerurl, true); // true for asynchronous 
+    xmlHttp.open("GET", publicgamerequest, true); // true for asynchronous 
     xmlHttp.send();
     
 
