@@ -16,7 +16,7 @@ let xmlHttp = new XMLHttpRequest();
 xmlHttp.onreadystatechange = function() {
     console.log(xmlHttp.responseText);
 
-    let response = xmlHttp.responseText;
+    let response = JSON.parse( xmlHttp.responseText );
 
     //connect to the game
 
