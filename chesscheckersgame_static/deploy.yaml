@@ -2,25 +2,25 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   #f stands for "files"
-  name: static-game-f-deployment
+  name: s-game-files-deployment
   labels:
-    podtype: static-game-f
+    podtype: s-game-files
 spec:
   replicas: 2
   selector:
     matchLabels:
-      podtype: static-game-f
+      podtype: s-game-files
 
   template:
 
     metadata:
       labels:
-        podtype: static-game-f
+        podtype: s-game-files
     spec:
       containers:
-        - name: static-game-f
+        - name: s-game-files
           image: gcr.io/level-unfolding-299521/github.com/guccialex/ccp-website@sha256:29b8a40ffdf164b6d100065c5c92eacbbadb3b11a5ec8b5ed48820b2f3d9fe70
           ports:
-            - name: static-game-f
+            - name: s-game-files
               containerPort: 8000
               protocol: TCP
