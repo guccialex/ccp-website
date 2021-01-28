@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   #f stands for "files"
   name: s-game-finder-deployment
-  
+
   labels:
     podtype: s-game-finder
 spec:
@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: s-game-finder
-          image: gcr.io/level-unfolding-299521/github.com/guccialex/ccp-website@sha256:29b8a40ffdf164b6d100065c5c92eacbbadb3b11a5ec8b5ed48820b2f3d9fe70
+          image: gcr.io/level-unfolding-299521/github.com/guccialex/static-game-finder-website@sha256:d2c0c03c6add1e04b9176163376d90766d1511c1fb04e572383cdeabfaaa8001
           ports:
             - name: s-game-finder
               containerPort: 8000
