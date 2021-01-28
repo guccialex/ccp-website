@@ -9,25 +9,20 @@ import init, { FullGame } from './wasmfiles/wasm_builder.js';
 const urlParams = new URLSearchParams(window.location.search);
 
 console.log(urlParams);
-const address = urlParams.get("address");
-const portnumber = urlParams.get("port");
-const gamepassword = urlParams.get("password");
+const addressandport = urlParams.get("addressandport");
+const gamepassword = urlParams.get("gamepassword");
 
 
 
-
-
-
-//these are gotten from outside or the calling function
-let websocketaddress = 'ws://'+ address +':'+ portnumber;
 
 
 //get the port and the password from the query string
 console.log("the query string:");
-console.log("address:" + address);
-console.log("port:" + portnumber);
-console.log("password:" + gamepassword);
+console.log("addressandport:" + addressandport);
+console.log("gamepassword:" + gamepassword);
 
+
+let websocketaddress = addressandport;
 
 
 

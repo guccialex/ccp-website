@@ -15,7 +15,26 @@ let xmlHttp = new XMLHttpRequest();
 
 xmlHttp.onreadystatechange = function() {
     console.log(xmlHttp.responseText);
-};
+
+    let response = xmlHttp.responseText;
+
+    //connect to the game
+
+    let querystring = "?";
+    
+    //make the query string for connecting to the game
+
+    querystring += "addressandport=" + response.addressandport;
+    querystring += "&";
+    querystring += "gamepassword=" + response.gamepassword;
+
+    let fulladdress = gamefilesurl + querystring;
+
+    console.log(fulladdress);
+
+    window.open(fulladdress); 
+
+};  
 
 
 
