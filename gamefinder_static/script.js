@@ -14,7 +14,7 @@ let xmlHttp = new XMLHttpRequest();
 
 
 xmlHttp.onreadystatechange = function() {
-    console.log(xhttp.responseText);
+    console.log(xmlHttp.responseText);
 };
 
 

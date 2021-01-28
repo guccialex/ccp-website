@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: s-game-finder
-          image: gcr.io/level-unfolding-299521/github.com/guccialex/static-game-finder-website@sha256:a5d3dfdb6e43741dad5db927e5280e07d9b23b98b67161c6330c61cbc76a4f4d
+          image: gcr.io/level-unfolding-299521/github.com/guccialex/static-game-finder-website@sha256:9bbc183b6b4518af7637f4ca25525e6e8492c180720ad7fe50839b0a0d9de6c1
           ports:
             - name: s-game-finder
               containerPort: 8000
