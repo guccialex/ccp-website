@@ -1,4 +1,4 @@
 steps:
-- name: 'docker'
-  args: ['build', '.']
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'https://github.com/guccialex/ccp-website/tree/main/gamefinder_static', '.']
 #images: ['gcr.io/$PROJECT_ID/myimage']
