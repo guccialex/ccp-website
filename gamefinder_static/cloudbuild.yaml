@@ -6,4 +6,4 @@ steps:
 
 
 images:
-- 'gcr.io/$PROJECT_ID/docker:latest'
+- 'gcr.io/$PROJECT_ID/myapp:latest'
