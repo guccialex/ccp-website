@@ -12,6 +12,10 @@ mkdir chesscheckersgame_static/wasmfiles
 
 cd wasm_builder
 
+
+#install wasm-pack
+curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
 #build the wasm package with the target of web
 wasm-pack build --target web
 
