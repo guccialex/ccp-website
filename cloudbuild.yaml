@@ -1,0 +1,40 @@
+steps:
+- name: 'rust'
+  args: ['./buildgamestatic.sh']
+  id: 'firststep'
+  waitFor: ['-']  # The '-' indicates that this step begins immediately.
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'gcr.io/$PROJECT_ID/gamefinder_static:latest',  './gamefinder_static/']
+  id: 'build_gamefinder_static'
+  waitFor: ['firststep']  # wait for firststep
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'gcr.io/$PROJECT_ID/gamefiles_static:latest',  './chesscheckersgame_static/']
+  id: 'build_gamefiles_static'
+  waitFor: ['firststep']  # wait for firststep
+
+
+- name: 'gcr.io/cloud-builders/kubectl'
+  args: ['apply', '-f', '/gamefinder_static/deploy.yamls']
+  waitFor: ['build_gamefiles_static']  # wait for firststep
+
+
+
+# - name: 'gcr.io/cloud-builders/docker'
+#   args: ['push', 'gcr.io/$PROJECT_ID/gamefiles_static:latest']
+#   id: 'push_gamesfiles_static'
+#   waitFor: ['build_gamefiles_static']
+
+
+# - name: 'gcr.io/cloud-builders/docker'
+#   args: ['push', 'gcr.io/$PROJECT_ID/gamefinder_static:latest']
+#   id: 'push_gamesfinder_static'
+#   waitFor: ['build_gamefinder_static']
+
+
+
+
+images:
+- 'gcr.io/$PROJECT_ID/gamefinder_static:latest'
+- 'gcr.io/$PROJECT_ID/gamefiles_static:latest'
