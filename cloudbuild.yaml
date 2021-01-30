@@ -18,11 +18,12 @@ steps:
 - name: 'gcr.io/cloud-builders/kubectl'
   args: ['apply', '-f', './gamefinder_static/deploy.yaml']
   waitFor: ['-']  # wait for firststep
-  #waitFor: ['build_gamefiles_static']  # wait for firststep
     env:
   - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
   - 'CLOUDSDK_CONTAINER_CLUSTER=cluster-1'
 
+
+#waitFor: ['build_gamefiles_static']  # wait for firststep
 
 
 # - name: 'gcr.io/cloud-builders/docker'
