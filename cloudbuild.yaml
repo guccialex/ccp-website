@@ -17,6 +17,7 @@ steps:
 
 
 
+
 - name: 'gcr.io/cloud-builders/kubectl'
   args: ['apply', '-f', './gamefinder_static/deploy.yaml']
   waitFor: ['-']  # wait for firststep
