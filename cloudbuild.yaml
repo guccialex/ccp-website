@@ -27,14 +27,14 @@ steps:
 
 - name: 'gcr.io/cloud-builders/kubectl'
   args: ['apply', '-f', 'gamefile-deploy.yaml']
-  waitFor: ['-']  # wait for firststep
+  waitFor: ['build_gamefiles_static']  # wait for firststep
   env:
   - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
   - 'CLOUDSDK_CONTAINER_CLUSTER=cluster-1'
 
 - name: 'gcr.io/cloud-builders/kubectl'
   args: ['apply', '-f', 'gamefinder-deploy.yaml']
-  waitFor: ['-']  # wait for firststep
+  waitFor: ['build_gamefinder_static']  # wait for firststep
   env:
   - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
   - 'CLOUDSDK_CONTAINER_CLUSTER=cluster-1'
@@ -45,14 +45,14 @@ steps:
 
 - name: 'gcr.io/cloud-builders/kubectl'
   args: ['apply', '-f', 'gamefile-service.yaml']
-  waitFor: ['-']  # wait for firststep
+  waitFor: ['build_gamefiles_static']  # wait for firststep
   env:
   - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
   - 'CLOUDSDK_CONTAINER_CLUSTER=cluster-1'
 
 - name: 'gcr.io/cloud-builders/kubectl'
   args: ['apply', '-f', 'gamefinder-service.yaml']
-  waitFor: ['-']  # wait for firststep
+  waitFor: ['build_gamefinder_static']  # wait for firststep
   env:
   - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
   - 'CLOUDSDK_CONTAINER_CLUSTER=cluster-1'

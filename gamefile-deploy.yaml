@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: s-game-files
-          image: gcr.io/$PROJECT_ID/gamefiles_static:latest
+          image: gcr.io/level-unfolding-299521/gamefiles_static:latest
           ports:
             - name: s-game-files
               containerPort: 8000
