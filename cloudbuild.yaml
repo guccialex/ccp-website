@@ -21,6 +21,11 @@ steps:
 
 
 
+images:
+- 'gcr.io/$PROJECT_ID/gamefinder_static:latest'
+- 'gcr.io/$PROJECT_ID/gamefiles_static:latest'
+
+
 
 
 # deploy the gamefile and gamefinder deployment
@@ -61,8 +66,3 @@ steps:
 
 
 
-
-
-images:
-- 'gcr.io/$PROJECT_ID/gamefinder_static:latest'
-- 'gcr.io/$PROJECT_ID/gamefiles_static:latest'
