@@ -20,29 +20,30 @@ steps:
   waitFor: ['firststep']  # wait for firststep
 
 
+#push the images to the repository
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/$PROJECT_ID/gamefiles_static:latest']
+  id: 'push_gamefiles'
+  waitFor: ['build_gamefiles_static']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/$PROJECT_ID/gamefinder_static:latest']
+  id: 'push_gamefinder'
+  waitFor: ['build_gamefinder_static']
 
 
-images:
-- 'gcr.io/$PROJECT_ID/gamefinder_static:latest'
-- 'gcr.io/$PROJECT_ID/gamefiles_static:latest'
 
-
-
-
-# deploy the gamefile and gamefinder deployment
-
-steps:
 
 - name: 'gcr.io/cloud-builders/kubectl'
   args: ['apply', '-f', 'gamefile-deploy.yaml']
-  waitFor: ['-']  # wait for firststep
+  waitFor: ['push_gamefiles']  # wait for firststep
   env:
   - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
   - 'CLOUDSDK_CONTAINER_CLUSTER=cluster-1'
 
 - name: 'gcr.io/cloud-builders/kubectl'
   args: ['apply', '-f', 'gamefinder-deploy.yaml']
-  waitFor: ['-']  # wait for firststep
+  waitFor: ['push_gamefinder']  # wait for firststep
   env:
   - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
   - 'CLOUDSDK_CONTAINER_CLUSTER=cluster-1'
@@ -50,22 +51,17 @@ steps:
 
 
 # deploy the gamefile and gamefinder service
-
 - name: 'gcr.io/cloud-builders/kubectl'
   args: ['apply', '-f', 'gamefile-service.yaml']
-  waitFor: ['-']  # wait for firststep
+  waitFor: ['push_gamefiles']  # wait for firststep
   env:
   - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
   - 'CLOUDSDK_CONTAINER_CLUSTER=cluster-1'
+
 
 - name: 'gcr.io/cloud-builders/kubectl'
   args: ['apply', '-f', 'gamefinder-service.yaml']
-  waitFor: ['-']  # wait for firststep
+  waitFor: ['push_gamefinder']  # wait for firststep
   env:
   - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
   - 'CLOUDSDK_CONTAINER_CLUSTER=cluster-1'
-
-
-
-
-
