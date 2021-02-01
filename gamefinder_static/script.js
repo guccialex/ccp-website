@@ -3,6 +3,9 @@
 //http://0.0.0.0:8082/index.html?port=2432&password=F38d
 
 
+console.log("updated with scriptjs working");
+
+
 
 let publicgamerequest = "http://35.239.40.242/matchmaker-api/join_public_game";
 let matchmakerurl = "http://35.239.40.242/matchmaker-api/";
