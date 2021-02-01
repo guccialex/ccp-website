@@ -21,6 +21,7 @@ steps:
 
 
 
+
 images:
 - 'gcr.io/$PROJECT_ID/gamefinder_static:latest'
 - 'gcr.io/$PROJECT_ID/gamefiles_static:latest'
