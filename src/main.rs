@@ -12,7 +12,7 @@ fn main() {
     rocket::ignite()
     .mount("/ccpgame", StaticFiles::from("static/chesscheckersgame_static"))
     .mount("/ccpfinder", StaticFiles::from("static/gamefinder_static"))
-    .mount("/", routes![ default_route ])
+    //.mount("/", routes![ default_route ])
     .launch();
 
 }
