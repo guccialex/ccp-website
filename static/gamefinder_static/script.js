@@ -5,6 +5,9 @@
 
 console.log("updated with scriptjs working");
 
+//teh base url
+console.log(location.href);
+
 
 
 let publicgamerequest = "http://35.239.40.242/matchmaker-api/join_public_game";

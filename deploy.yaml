@@ -1,0 +1,26 @@
+#the name is rocket-web
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rocket-web-deployment
+  labels:
+    podtype: rocket-web-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      podtype: rocket-web-deployment
+
+  template:
+    metadata:
+      labels:
+        podtype: rocket-web-deployment
+    spec:
+      containers:
+        - name: rocket-web-deployment
+          image: gcr.io/$PROJECT_ID/rocket-web:latest
+          ports:
+            - name: rocket-web-deployment
+              containerPort: 8000
+              protocol: TCP

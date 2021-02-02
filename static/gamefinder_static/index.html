@@ -1,0 +1,65 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    
+    <title>Game Director</title>
+    
+</head>
+
+<body>
+    
+    
+    
+    <script>
+        //FOR A REASON THAT I CANNOT COMPREHEND
+        //AND WHICH TOOK
+        //AN UNFORTUNATE AMOUNT OF TIME TO FIX
+        //PROBABLY THE ENTIRETY OF A DAY AND A HALFS WORK ALL CONSIDERED
+        //BUT ALSO NOT ALL THAT MUCH WHEN COMPARED TO HOW MUCH TIME I SPEND PLAYING MTG ARENA
+        //USING A RELATIVE PATH TO NAVIGATE TO WHERE THE SCRIPT IS
+        //IS NOT SOMETHING THAT THE INTERNET WANTS ME TO DO
+        //AND SO THIS IS THE ONLY WAY
+        //OUT OF, TRUST ME, MANY
+        //TO REDIRECT TO THE PATH, RELATIVE TO WHERE THE BROWSER IS CURRENTLY, TO /SCRIPT.JS
+
+        let value = location.href + "/script.js";
+    
+        document.addEventListener('DOMContentLoaded', () => {
+            document.head.appendChild(document.createElement('script')).src = value;
+        });
+    </script>
+    
+    
+    
+    
+    
+    
+    
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <button onclick="ConnectToPublicGame()">connect to public game</button>
+    <br>
+    <br>
+    <button onclick="CreatePrivateGame()">create private game</button>
+    <br>
+    <br>
+    
+    <input type="text" id="gamepassword" value="password">
+    <button onclick="ConnectToPrivateGame()">join private game</button>
+    
+    <br>
+    <br>
+    
+    
+    <p id="demo"></p>
+    
+    
+    
+</body>
+</html>
