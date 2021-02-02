@@ -3,26 +3,38 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rocket-web-deployment
+  name: rocket-web-d
   labels:
-    podtype: rocket-web-deployment
+    podtype: rocket-web-d
 spec:
   replicas: 2
   selector:
     matchLabels:
-      podtype: rocket-web-deployment
+      podtype: rocket-web-d
 
   template:
     metadata:
       labels:
-        podtype: rocket-web-deployment
+        podtype: rocket-web-d
     spec:
       containers:
-        - name: rocket-web-deployment
-          image: gcr.io/$PROJECT_ID/rocket-web:latest
+        - name: rocket-web-d
+          image: gcr.io/level-unfolding-299521/rocket-web:latest
           ports:
-            - name: rocket-web-deployment
+            - name: rocket-web-d
               containerPort: 8000
               protocol: TCP
 
-              
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rocket-web-s
+spec:
+  selector:
+    podtype: rocket-web-d
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000

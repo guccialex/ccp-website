@@ -5,14 +5,17 @@
 
 console.log("updated with scriptjs working");
 
-//teh base url
+//the base url
 console.log(location.href);
 
 
+let baseurl = location.href;
 
-let publicgamerequest = "http://35.239.40.242/matchmaker-api/join_public_game";
-let matchmakerurl = "http://35.239.40.242/matchmaker-api/";
-let gamefilesurl = "http://35.239.40.242/static-game-files/";
+
+
+
+let publicgamerequest = baseurl + "/matchmaker-api/join_public_game";
+let gamefilesurl = baseurl + "/static-game-files/";
 
 
 let xmlHttp = new XMLHttpRequest();

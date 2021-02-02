@@ -14,23 +14,13 @@ steps:
   waitFor: ['build_static']
 
 
-#deploy it
+#deploy the deployment and service
 - name: 'gcr.io/cloud-builders/kubectl'
   args: ['apply', '-f', 'deploy.yaml']
   waitFor: ['push_image']
   env:
   - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
   - 'CLOUDSDK_CONTAINER_CLUSTER=cluster-1'
-
-
-#apply the service
-- name: 'gcr.io/cloud-builders/kubectl'
-  args: ['apply', '-f', 'service.yaml']
-  waitFor: ['push_image']
-  env:
-  - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
-  - 'CLOUDSDK_CONTAINER_CLUSTER=cluster-1'
-
 
 
 timeout: 1800s
