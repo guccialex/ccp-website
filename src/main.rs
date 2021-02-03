@@ -12,7 +12,7 @@ fn main() {
     rocket::ignite()
     .mount("/ccpgame", StaticFiles::from("static/chesscheckersgame_static"))
     .mount("/ccpfinder", StaticFiles::from("static/gamefinder_static"))
-    //.mount("/", routes![ default_route ])
+    .mount("/", routes![ health_check ])
     .launch();
 
 }
@@ -23,10 +23,15 @@ use std::path::PathBuf;
 
 
 
-//catch every request not caught by another route
-#[get("/<path..>")]
-fn default_route(path: PathBuf) -> String{ 
-    
-    format!("{:?} cannot be routed to", path)
+use rocket::http::Status;
 
- }
+//catch all paths without a slash in them
+//respond to the health check and return a status of 200
+#[get("/<catchall>")]
+fn health_check(catchall: String) -> Status{
+
+    println!("the path requested: {:?}", catchall);
+    println!("health check performed");
+
+    Status::Ok
+}
