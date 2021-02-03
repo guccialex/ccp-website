@@ -23,15 +23,13 @@ fn main() {
 //use std::path::PathBuf;
 
 
-
 use rocket::http::Status;
 
-//catch all paths without a slash in them
+//catch all root paths
 //respond to the health check and return a status of 200
-#[get("/<catchall>")]
-fn health_check(catchall: String) -> Status{
+#[get("/")]
+fn health_check() -> Status{
 
-    println!("the path requested: {:?}", catchall);
     println!("health check performed");
 
     Status::Ok
