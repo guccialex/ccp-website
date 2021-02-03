@@ -9,17 +9,18 @@ use rocket_contrib::serve::{StaticFiles};
 
 fn main() {
 
+    //priority of mounted paths is in lowest to highest priority it seems?
     rocket::ignite()
+    .mount("/", routes![ health_check ])
     .mount("/ccpgame", StaticFiles::from("static/chesscheckersgame_static"))
     .mount("/ccpfinder", StaticFiles::from("static/gamefinder_static"))
-    .mount("/", routes![ health_check ])
     .launch();
 
 }
 
 
 
-use std::path::PathBuf;
+//use std::path::PathBuf;
 
 
 
