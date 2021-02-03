@@ -8,6 +8,9 @@ RUN rustup default nightly
 
 RUN ./buildgamestatic.sh
 
-RUN cargo build
+RUN cargo update
+RUN cargo build --release
 
-CMD ROCKET_ENV=prod cargo run --release
+#ROCKET_ENV=prod
+
+CMD cargo run --release
