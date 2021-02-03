@@ -9,13 +9,15 @@ console.log("updated with scriptjs working");
 console.log(location.href);
 
 
-let baseurl = location.href;
+let baseurl = psl.parse(location.href);
 
-
+console.log("base domain is:" + baseurl);
 
 
 let publicgamerequest = baseurl + "/matchmaker-api/join_public_game";
 let gamefilesurl = baseurl + "/static-game-files/";
+
+
 
 
 let xmlHttp = new XMLHttpRequest();
