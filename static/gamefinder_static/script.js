@@ -5,17 +5,17 @@
 
 console.log("updated with scriptjs working");
 
-//the base url
-console.log(location.href);
 
-
-let baseurl = psl.parse(location.href);
-
-console.log("base domain is:" + baseurl);
+let baseurl = window.location.origin;
 
 
 let publicgamerequest = baseurl + "/matchmaker-api/join_public_game";
-let gamefilesurl = baseurl + "/static-game-files/";
+let gamefilesurl = baseurl + "/static-game-files";
+
+
+console.log(publicgamerequest);
+console.log(gamefilesurl);
+console.log(baseurl);
 
 
 
@@ -25,16 +25,15 @@ let xmlHttp = new XMLHttpRequest();
 
 
 xmlHttp.onreadystatechange = function() {
+
     console.log(xmlHttp.responseText);
 
     let response = JSON.parse( xmlHttp.responseText );
 
     //connect to the game
-
-    let querystring = "?";
+    let querystring = "/?";
     
     //make the query string for connecting to the game
-
     querystring += "addressandport=" + response.addressandport;
     querystring += "&";
     querystring += "gamepassword=" + response.gamepassword;
@@ -42,6 +41,7 @@ xmlHttp.onreadystatechange = function() {
     let fulladdress = gamefilesurl + querystring;
 
     console.log(fulladdress);
+    
 
     window.open(fulladdress); 
 
@@ -58,11 +58,6 @@ function ConnectToPublicGame() {
     xmlHttp.open("GET", publicgamerequest, true); // true for asynchronous 
     xmlHttp.send();
     
-
-    /*
-    console.log("connecting to public game");
-    console.log(gamefilesurl);
-    */
 }
 
 
@@ -70,16 +65,17 @@ function ConnectToPrivateGame() {
     document.getElementById("demo").innerHTML = "connecting to private game";
 
     let password = document.getElementById("gamepassword").value;
-
-    console.log("connect to private game" + password);
+    
+    xmlHttp.open("GET", publicgamerequest, true); // true for asynchronous 
+    xmlHttp.send();
 }
 
 
 function CreatePrivateGame() {
     document.getElementById("demo").innerHTML = "creating private game";
 
-    console.log("creating private game");
-
+    xmlHttp.open("GET", publicgamerequest, true); // true for asynchronous 
+    xmlHttp.send();
 }
 
 
