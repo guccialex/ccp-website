@@ -10,7 +10,7 @@ let baseurl = window.location.origin;
 
 
 let publicgamerequest = baseurl + "/matchmaker-api/join_public_game";
-let gamefilesurl = baseurl + "/static-game-files";
+let gamefilesurl = baseurl + "/ccpgame";
 
 
 console.log(publicgamerequest);

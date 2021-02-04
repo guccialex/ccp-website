@@ -37,7 +37,7 @@
 
 
     <script>
-        let value = location.href + "/gamesession.js";
+        let value = window.location.origin + "ccpgame/gamesession.js";
     
         document.addEventListener('DOMContentLoaded', () => {
             document.head.appendChild(document.createElement('script')).src = value;
