@@ -103,6 +103,8 @@ async function start(socket, playerid){
     //create an event listener that when a message is received, it is sent to the game
     mygame.socket.onmessage = function (event) {
 
+        console.log("got message from client");
+
         mygame.get_message(event.data);
     };
     
