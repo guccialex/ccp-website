@@ -438,10 +438,9 @@ impl LocalGameInterface{
         
         
         
-        
-        
         //if theres an object being dragged
-        if let Some(dragged) = clientstate.dragged{
+        //add the drag indicator to be drawn
+        if let Some(dragged) = &clientstate.dragged{
             
             
             //if there is a selectedobject and it is a piece
@@ -450,17 +449,15 @@ impl LocalGameInterface{
                 let (reldistx, reldisty) = dragged.relativepos;
 
                 //get the position of the selected piece
-                let selectedposition = self.get_object_flat_plane_position(selectedobject);
+                let selectedposition = self.get_object_flat_plane_position( clientstate.selectedobject.unwrap() );
                 
-                let (position, rotation) = get_position_and_rotation_of_cue_indicator(selectedposition, relativedistancex, relativedistancey);
-            
+                //get the position and rotation of the cue
+                let (position, rotation) = get_position_and_rotation_of_cue_indicator(selectedposition, reldistx, reldisty);
+
+                //add the cue to the objects to be rendered
+                toreturn.new_cue(position, rotation);
             }
-            
-            
         }
-        
-        
-        
         
         
         
@@ -740,9 +737,7 @@ impl LocalGameInterface{
             //get its position
             let (xpos, ypos, zpos) = self.thegame.get_board_game_object_translation(objectid);
             
-            return  (xpos,zpos ) ;
-            
-            
+            return  (xpos,zpos ) ;            
         }
         
         (0.0,0.0)
@@ -795,3 +790,46 @@ impl LocalGameInterface{
 
 
 
+
+
+
+
+
+fn get_position_and_rotation_of_cue_indicator(piecepos: (f32,f32), reldistx: f32, reldisty: f32) -> ((f32,f32,f32), (f32,f32,f32)){
+    
+    //the distance plus the length of half the cue
+    let curtotaldistance = (reldistx * reldistx + reldisty * reldisty).sqrt();
+    
+    //if the distance of the que is farther or closer than it should be, change the scalar to render it within range
+    let mut distancescalar = 1.0;
+    
+    //if the distance of the que is less than 2 units away from the piece, make it two units away
+    if curtotaldistance <= 1.0{
+        distancescalar = 1.0 / curtotaldistance ;
+    }
+    
+    
+    //0 + the ratio of the hypotenuse length to x length * cue length
+    let xcuedistance = (reldistx / curtotaldistance ) * 1.0 ;
+    //0 + the ratio of the hypotenuse length to y length * cue length
+    let ycuedistance = (reldisty / curtotaldistance ) * 1.0 ;
+    
+    
+    //i want it to circle around the selected pieces position
+    //facing inwards
+    
+    let xdistancefromselected = (reldistx * distancescalar) + xcuedistance;
+    let zdistancefromselected = (reldisty * distancescalar) + ycuedistance;
+    
+    let xrotation = reldistx.atan2(reldisty);
+    
+    
+    
+    let position = (piecepos.0 + xdistancefromselected, 0.8, piecepos.1 + zdistancefromselected);
+    let rotation = (0.0, xrotation, 0.0);
+    
+    
+    
+    return (position, rotation) ;
+    
+}
