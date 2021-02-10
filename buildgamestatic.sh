@@ -2,7 +2,8 @@
 
 
 #pull the ccp-game from the server to be used as a dependancy for single_server
-svn co https://github.com/guccialex/ccp-game.git/trunk/chesspoker_package
+
+#svn co https://github.com/guccialex/ccp-game.git/trunk/chesspoker_package
 
 
 
