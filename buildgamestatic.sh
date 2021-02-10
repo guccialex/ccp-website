@@ -7,7 +7,7 @@ svn co https://github.com/guccialex/ccp-game.git/trunk/chesspoker_package
 
 
 #install wasm-pack
-curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSfy | sh
+curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
 
 #build the wasm package with the target of web
