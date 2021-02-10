@@ -210,6 +210,19 @@ impl LocalGameInterface{
 
 
 
+
+        //complete steps to render the state of the game
+
+        /*
+        draw each piece
+
+        draw each board square of the right colour
+
+
+        */
+
+
+
         
         //add the timer for the player and the opponent
         {

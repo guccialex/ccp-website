@@ -9,7 +9,8 @@ edition = "2018"
 
 [dependencies]
 
-physicsengine = { path = "../chesspoker_package" }
+
+physicsengine = { git = "https://github.com/guccialex/ccp-game/tree/main/chesspoker_package" }
 
 #for testing, the source above is for deploying
 #physicsengine = { path = "../../ccp-game/chesspoker_package" }
