@@ -10,7 +10,7 @@ edition = "2018"
 [dependencies]
 
 
-physicsengine = { git = "https://github.com/guccialex/ccp-game" }
+physicsengine = { git = "https://github.com/guccialex/ccp-game/", branch = "main" }
 
 #for testing, the source above is for deploying
 #physicsengine = { path = "../../ccp-game/chesspoker_package" }
@@ -19,7 +19,7 @@ physicsengine = { git = "https://github.com/guccialex/ccp-game" }
 wasm-bindgen = { version = "*", features = ["serde-serialize"] }
 
 serde = { version = "*", features = ["derive"] }
-#serde_json = "*"
+
 
 bincode = "*"
 
