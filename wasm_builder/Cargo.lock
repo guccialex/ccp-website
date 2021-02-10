@@ -233,7 +233,6 @@ dependencies = [
  "cfg-if 0.1.10",
  "libc",
  "wasi 0.9.0+wasi-snapshot-preview1",
- "wasm-bindgen",
 ]
 
 [[package]]
@@ -458,12 +457,13 @@ dependencies = [
 [[package]]
 name = "physicsengine"
 version = "0.1.0"
+source = "git+https://github.com/guccialex/ccp-game/?branch=main#084579a385409b33f3e0a5f764c5945fc776222a"
 dependencies = [
  "bincode",
  "nalgebra",
  "ncollide3d",
  "nphysics3d",
- "rand 0.7.3",
+ "rand 0.6.5",
  "rapier3d",
  "rs_poker",
  "serde",
@@ -629,6 +629,7 @@ dependencies = [
  "libc",
  "rand_core 0.4.2",
  "rdrand",
+ "wasm-bindgen",
  "winapi",
 ]
 
