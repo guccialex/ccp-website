@@ -9,8 +9,10 @@ edition = "2018"
 
 [dependencies]
 
+#physicsengine = { path = "../chesspoker_package" }
 
-physicsengine = { path = "../chesspoker_package" }
+#for testing, the source above is for deploying
+physicsengine = { path = "../../ccp-game/chesspoker_package" }
 
 
 wasm-bindgen = { version = "*", features = ["serde-serialize"] }
@@ -29,3 +31,7 @@ crate-type = ["cdylib"]
 
 [package.metadata.wasm-pack.profile.release]
 wasm-opt = false
+
+
+[profile.release]
+#panic = "unwind"

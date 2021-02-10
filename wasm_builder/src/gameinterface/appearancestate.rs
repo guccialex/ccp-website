@@ -22,6 +22,15 @@ pub struct FullAppearanceState{
     
     //the visible objects
     objects: Vec<AppearanceData>,
+
+
+    //if either player won
+    winningplayer: Option<u8>,
+
+
+    //guioverlay
+
+    //size, message, image,
     
 }
 
@@ -30,6 +39,8 @@ impl FullAppearanceState{
     pub fn new() -> FullAppearanceState{
         FullAppearanceState{
             objects: Vec::new(),
+
+            winningplayer: None,
         }   
     }
     
@@ -39,36 +50,9 @@ impl FullAppearanceState{
     }
     
     
-    /*
-    pub fn make_object_colour(&mut self, objectname: String, colour: (f32,f32,f32)){
-        
-        for curobject in self.objects.iter_mut(){
-            
-            if curobject.name == objectname{
-                
-                let unmixedcolourfloat = colour;
-                let colourfloat = (curobject.texture.colour.0 as f32, curobject.texture.colour.1 as f32, curobject.texture.colour.2 as f32);
-                
-                let mixedr = unmixedcolourfloat.0 * 0.8 + colourfloat.0 * 0.2;
-                let mixedg = unmixedcolourfloat.1 * 0.8 + colourfloat.1 * 0.2;
-                let mixedb = unmixedcolourfloat.2 * 0.8 + colourfloat.2 * 0.2;
-                
-                //make its colour closer to green
-                curobject.texture.colour = (mixedr as u8, mixedg as u8, mixedb as u8);
-                
-            }
-        }
+    pub fn player_won(&mut self, playerid: u8){
+        self.winningplayer = Some(playerid);
     }
-    */
-    
-    
-    /*
-    //add an object to display that displays X / X
-    pub fn append_value_selected(&mut self, valuex: u8){
-        
-        self.add_object( AppearanceData::new_piece_value_offered(valuex) );
-    }
-    */
     
     
 }
@@ -95,6 +79,43 @@ impl FullAppearanceState{
     }
 
 
+    //what colour to tint the object and by what amount (1.0 = 100%, 0.0 = 0%)
+    pub fn tint_object_colour(&mut self, objectname: String, colour: (u8, u8, u8), mut tintamount: f32){
+        
+        let tintingcolourfloat = (colour.0 as f32, colour.1 as f32, colour.2 as f32);
+
+        //make the tint amount in the appropriate range
+        if tintamount > 1.0{
+            tintamount = 1.0
+        }
+        if tintamount < 0.0{
+            tintamount = 0.0;
+        }
+
+        let tintinverse = 1.0 - tintamount;
+
+
+        for curobject in self.objects.iter_mut(){
+            
+            if curobject.name == objectname{
+                
+
+                let colourfloat = (curobject.texture.colour.0 as f32, curobject.texture.colour.1 as f32, curobject.texture.colour.2 as f32);
+                
+                let mixedr = tintingcolourfloat.0 * tintamount + colourfloat.0 * tintinverse;
+                let mixedg = tintingcolourfloat.1 * tintamount + colourfloat.1 * tintinverse;
+                let mixedb = tintingcolourfloat.2 * tintamount + colourfloat.2 * tintinverse;
+                
+                //make its colour closer to green
+                curobject.texture.colour = (mixedr as u8, mixedg as u8, mixedb as u8);
+                
+            }
+        }
+    }
+
+
+
+
     pub fn new_cue(&mut self, pos: (f32,f32,f32), rot: (f32,f32,f32)){
         
         let mut toadd = AppearanceData::default_object("dragindicator".to_string(), pos, rot);
@@ -106,13 +127,21 @@ impl FullAppearanceState{
         self.objects.push(toadd);
     }
     
-    pub fn new_deck(&mut self){
+    pub fn new_deck(&mut self, candraw: bool){
 
         let mut toadd = AppearanceData::default_object("deck".to_string(), (-7.0,0.0,0.0), (0.0,0.0,0.0));
 
-        toadd.set_colour( (200,200,200) );
+        if candraw{
+
+            toadd.set_colour( (200,200,200) );            
+        }
+        else{
+
+            toadd.set_colour( (0,0,0) );
+        }
+
         toadd.set_cube( (0.6, 1.96, 1.4) );
-        toadd.set_image( "cardart/cardback.jpg".to_string() );
+        //toadd.set_image( "cardart/cardback.jpg".to_string() );
         
         
         self.objects.push(toadd);
@@ -161,7 +190,7 @@ impl FullAppearanceState{
 
         let mut toadd = AppearanceData::default_object(name , position, (0.0,0.0,0.0));
 
-        toadd.set_colour( (200,200,200) );
+        toadd.set_colour( colour );
         toadd.set_cube( (0.01, 2.0, 2.0) );
         toadd.set_text( timeleft, (0.0,30.0), 30);
         
@@ -357,6 +386,33 @@ impl FullAppearanceState{
 
 
 
+    //display a gui message
+    pub fn new_gui_message(&mut self, message: String){
+
+        //effect: start a game of pool
+
+        /*
+
+        You need to settle the ante of 1 to continue
+
+        If you dont...
+
+        Well
+
+        Your opponent gets some piece
+
+
+
+        (i still dont know what the "if you dont" is)
+
+        */
+
+
+
+    }
+
+
+
 }
 
 
@@ -367,7 +423,7 @@ impl FullAppearanceState{
 //for babylon to take and display
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
-pub struct AppearanceData{
+struct AppearanceData{
     
     name: String,
     
@@ -481,7 +537,7 @@ impl AppearanceData{
 
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
-#[serde(tag = "type")]
+//#[serde(tag = "type")]
 pub enum ShapeType{
     Cube(CubeShape),
     Cylinder(CylinderShape),

@@ -3,39 +3,60 @@
 import init, { FullGame } from './wasmfiles/wasm_builder.js';
 
 
+//the baseurl
+//let baserl = document.getElementById("myBase").href;
 
+console.log(window.location.origin);
+console.log(window.location.pathname);
+console.log(window.location);
+
+
+
+
+//run either connected to the server if the addressandport and the gamepassword
+//are passed in
+//or run just as the client if theyre not
 
 
 const urlParams = new URLSearchParams(window.location.search);
 
+
 console.log(urlParams);
-const addressandport = urlParams.get("addressandport");
-const gamepassword = urlParams.get("gamepassword");
+
+
+
+if ( (urlParams.has("addressandport") === true) && (urlParams.has("gamepassword") === true) ) {
+    
+    let addressandport = urlParams.get("addressandport");
+    let gamepassword = urlParams.get("gamepassword");
+    
+    run(addressandport, gamepassword);
+}
+else{
+
+    
+
+
+    run_serverless()
+}
 
 
 
 
 
-//get the port and the password from the query string
-console.log("the query string:");
-console.log("addressandport:" + addressandport);
-console.log("gamepassword:" + gamepassword);
-
-
-let websocketaddress = addressandport;
 
 
 
 
-run();
 
 
 
 
-async function run() {
+async function run(websocketaddress, gamepassword) {
     
     await init();
     
+    console.log("running connected to server");
     console.log(websocketaddress);
     
     
@@ -79,10 +100,20 @@ async function run() {
         
     };
     
-    
-    
 }
 
+
+
+
+
+async function run_serverless() {
+    
+    await init();
+    
+    console.log("running NOT connected to server");
+    
+    start(null, 1);
+}
 
 
 
@@ -92,27 +123,41 @@ async function start(socket, playerid){
     
     
     let canvas = document.getElementById("renderCanvas"); // Get the canvas element
+
+
+    //canvas.style.width = "800px";
+    //canvas.style.height = "400px"; 
+
     let engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
-    
-    let mygame = new GameInterface(engine, socket, playerid);
+
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
     
     console.log("started");
     
-    
-    
-    //create an event listener that when a message is received, it is sent to the game
-    mygame.socket.onmessage = function (event) {
+    let mygame = new GameInterface(engine, socket, playerid);
 
-        console.log("got message from client");
 
-        mygame.get_message(event.data);
-    };
+        
+    //if its being started with a socket, and connected to the server
+    if (socket != null){
+
+        //create an event listener that when a message is received, it is sent to the game
+        mygame.socket.onmessage = function (event) {
+            
+            console.log("got message from client");
+            
+            mygame.get_message(event.data);
+        };
+    }
     
     
     
     //run the game
     rungame(mygame);
 }
+
+
 
 
 
@@ -128,7 +173,6 @@ async function rungame(thegame) {
         
         thegame.mouseup();
     });
-    
     
     //add an event for themouse going down
     window.addEventListener("pointerdown", function () {
@@ -211,6 +255,10 @@ class GameApperance{
         
         //get the canvas for this engine to attach a control tos
         let canvas = engine.getRenderingCanvas();
+
+
+
+
         
         
         camera.attachControl(canvas, true);
@@ -229,7 +277,8 @@ class GameApperance{
         
         
         this.advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
-        
+
+        this.wonbutton = null;
         
         this.thegameinterface = gameinterface;
         
@@ -265,9 +314,7 @@ class GameApperance{
         image.height = "20%";
         image.left = "-40%";
         image.top = "-40%";
-        //this.advancedTexture.addControl(image);
-        
-        
+        this.advancedTexture.addControl(image);
         
         
         
@@ -295,40 +342,45 @@ class GameApperance{
             let objectmesh = this.scene.getMeshByName(objectname);
             
             
+            //console.log(objectdata);
             
             
             
-            //if the mesh doesnt exist
+            //if the mesh doesnt exist yet
             if (objectmesh == null){
                 
-                //console.log(objectdata);
-                
-                let shapedata = objectdata.shape.shapetype;
-                let shapetypename = objectdata.shape.shapetype.type;
-                
-                if (shapetypename == "Cube"){
+                let shapetype = objectdata.shapetype;
+
+
+                if (shapetype.Cube != undefined){
+
+                    let shapedata = shapetype.Cube;    
                     
                     let options = {
-                        height : shapedata.dimensions[0],
-                        width  : shapedata.dimensions[1],
-                        depth  : shapedata.dimensions[2],
+                        height : shapedata[0],
+                        width  : shapedata[1],
+                        depth  : shapedata[2],
                     };
                     
                     objectmesh = BABYLON.MeshBuilder.CreateBox(objectname, options, this.scene);
                 }
-                else if (shapetypename == "Cylinder"){
+                else if (shapetype.Cylinder != undefined){
                     
+                    let shapedata = shapetype.Cylinder;
+
                     let options = {
-                        height : shapedata.dimensions[0],
-                        diameter  : shapedata.dimensions[1],
+                        height : shapedata[0],
+                        diameter  : shapedata[1],
                     };
                     
                     objectmesh = BABYLON.MeshBuilder.CreateCylinder(objectname, options, this.scene);
                 }
-                else if (shapetypename == "Circle"){
+                else if (shapetype.Circle != undefined){
                     
+                    let shapedata = shapetype.Circle;
+
                     let options = {
-                        diameter: shapedata.diameter
+                        diameter: shapedata[0]
                     };
                     
                     objectmesh = BABYLON.MeshBuilder.CreateSphere(objectname, options, this.scene);
@@ -341,14 +393,14 @@ class GameApperance{
             
             
             //if this mesh was just created, or the shape needs to updated
-            objectmesh.position.x = (objectmesh.position.x * 0.5) + (objectdata.shape.position[0] * 0.5);
-            objectmesh.position.y = (objectmesh.position.y * 0.5) + (objectdata.shape.position[1] * 0.5);
-            objectmesh.position.z = (objectmesh.position.z * 0.5) + (objectdata.shape.position[2] * 0.5);
+            objectmesh.position.x = (objectmesh.position.x * 0.5) + (objectdata.position[0] * 0.5);
+            objectmesh.position.y = (objectmesh.position.y * 0.5) + (objectdata.position[1] * 0.5);
+            objectmesh.position.z = (objectmesh.position.z * 0.5) + (objectdata.position[2] * 0.5);
             
             
-            objectmesh.rotation.x = objectdata.shape.rotation[0];
-            objectmesh.rotation.y = objectdata.shape.rotation[1];
-            objectmesh.rotation.z = objectdata.shape.rotation[2];
+            objectmesh.rotation.x = objectdata.rotation[0];
+            objectmesh.rotation.y = objectdata.rotation[1];
+            objectmesh.rotation.z = objectdata.rotation[2];
             
             
             
@@ -359,9 +411,9 @@ class GameApperance{
             if (objectmesh.material == null){
                 
                 objectmesh.material = new BABYLON.StandardMaterial("bs_mat", this.scene);
-                
             }
             
+
             let colour = new BABYLON.Color3( objectdata.texture.colour[0] / 255, objectdata.texture.colour[1] / 255, objectdata.texture.colour[2] /255);
             objectmesh.material.diffuseColor = colour;
             
@@ -369,6 +421,8 @@ class GameApperance{
             
             //if this object has an image for its texture
             if (objectdata.texture.image != null){
+
+                //if the object doesnt have a texture set yet
                 objectmesh.material.ambientTexture = new BABYLON.Texture(objectdata.texture.image, this.scene);
             }
             
@@ -377,7 +431,7 @@ class GameApperance{
             //if this object has text
             let textdata = objectdata.texture.text;
             if (textdata != null){
-
+                
                 let texture = new BABYLON.DynamicTexture("dynamic texture", {width:100, height:100}, this.scene);   
                 objectmesh.material.diffuseTexture = texture;
                 
@@ -389,7 +443,6 @@ class GameApperance{
                 objectmesh.material.diffuseTexture.drawText(text, xpos, ypos, font, "white", "transparent", true, true);
                 
                 objectmesh.material.useAlphaFromDiffuseTexture = true;
-                
                 
             }
             
@@ -423,6 +476,28 @@ class GameApperance{
             }
         }
         
+
+
+ 
+        //check if either player won
+        if (appearancedata.winningplayer != null){
+
+            //if it doesnt exist already yet
+            if (this.wonbutton == null){
+
+                var button1 = BABYLON.GUI.Button.CreateSimpleButton("wongui", "Congrats player " + appearancedata.winningplayer + " you won. We can all go home now");
+                button1.width = "550px"
+                button1.height = "200px";
+                button1.color = "white";
+                button1.cornerRadius = 20;
+                button1.background = "green";
+
+                this.wonbutton = button1;
+
+                this.advancedTexture.addControl(button1);
+            }
+
+        }
         
         
         this.scene.render();
@@ -448,6 +523,8 @@ class GameInterface{
     
     
     constructor(engine, socket, playerid){
+
+
         
         //create the "appearance" object for this game, giving it the scene of the engine
         this.gameappearance = new GameApperance(engine, this);
@@ -456,7 +533,7 @@ class GameInterface{
         
         //create the wasm game
         this.wasmgame = FullGame.new(playerid);
-        
+
         
         //if an object is being dragged (if the camera movement is disabled)
         this.draggingobject = false;
@@ -503,14 +580,22 @@ class GameInterface{
         
         
         //get if any outgoing message is queued to be sent
-        if (this.wasmgame.is_outgoing_socket_message_queued() ){
+        if ( this.wasmgame.is_outgoing_socket_message_queued() ){
+
+            let message = this.wasmgame.pop_outgoing_socket_message();
             
-            console.log("im sending a websocket message");
+
+            //if there is a socket for this game
+            if (this.socket != null){
+
+                console.log("im sending a websocket message");
             
-            //and send them to the server
-            this.socket.send( this.wasmgame.pop_outgoing_socket_message() );
+                //and send them to the server
+                this.socket.send( message );
+            }
         }
         
+
     }
     
     
@@ -614,7 +699,7 @@ class GameInterface{
                 
                 
                 //if the object is already selected, and is flickable
-                if (this.wasmgame.is_object_selected_and_flickable(clickedobjectname)){
+                if (this.wasmgame.is_object_selected_and_draggable(clickedobjectname)){
                     
                     //disable panning rotating, all camera movement basically
                     //and remporarily
@@ -638,17 +723,17 @@ class GameInterface{
                 }
                 //if its not already the selected object, or is not flickable
                 else{
-                    this.wasmgame.click_object( clickedobjectname);
+                    this.wasmgame.mouse_down( clickedobjectname);
                 }
             }
             //if the clicked object doesnt have a name, set the selected mesh to none
             else{
-                this.wasmgame.click_object("");
+                this.wasmgame.mouse_down("");
             }
         }
         //if it wasnt, clear the selected object
         else{
-            this.wasmgame.click_object("");
+            this.wasmgame.mouse_down("");
         }
         
         

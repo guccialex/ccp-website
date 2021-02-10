@@ -40,18 +40,6 @@ extern "C" {
 
 
 
-/*
-mod interface;
-use interface::LocalGameInterface;
-use interface::ObjectType;
-use interface::FullAppearanceState;
-use interface::AppearanceData;
-use interface::objectname_to_objecttype;
-use interface::objecttype_to_objectname;
-
-*/
-
-
 
 
 
@@ -68,7 +56,6 @@ use std::collections::HashSet;
 struct Dragged{
     
     relativepos: (f32,f32),
-
     objectover: Option<ObjectType>,
 
 }
@@ -122,44 +109,6 @@ pub struct FullGame{
 }
 
 
-//roles of "fullgame"
-
-
-
-/*
-
-the functions that javascript needs to interact with the game:
-
-
-new()
-
-
-get_incoming_socket_message(&mut self, message: String)
--> receivegameupdates
-
-is_outgoing_socket_message_queued(&self) -> bool
-
-pop_outgoing_socket_message(&mut self) -> String
-
-
-
-
-
-tick(&mut self)
-
-get_appearance_data(&mut self) -> JsValue
-
-is_object_selected_and_flickable(&self, objectname: String)
-
-mouse_down(&mut self, objectname: String)
-
-drag_selected_object(&mut self, relativedistancex: f32, relativedistancey: f32, objectovername: String )
-
-mouse_up(&mut self)
-
-*/
-
-
 
 
 
@@ -170,7 +119,9 @@ impl FullGame{
     pub fn new(playerid: u8) -> FullGame{
         
         //set the panic hook so i get real error reporting
-        panic::set_hook(Box::new(console_error_panic_hook::hook));
+        panic::set_hook( Box::new(console_error_panic_hook::hook) );
+
+
         
         FullGame{
             
@@ -484,52 +435,6 @@ fn get_flick_force(relativedistancex: f32, relativedistancey: f32) -> Option<(f3
     
     
 }
-
-
-
-fn get_position_and_rotation_of_cue_indicator(piecepos: (f32,f32), reldistx: f32, reldisty: f32) -> ((f32,f32,f32), (f32,f32,f32)){
-    
-    //the distance plus the length of half the cue
-    let curtotaldistance = (reldistx * reldistx + reldisty * reldisty).sqrt();
-    
-    //if the distance of the que is farther or closer than it should be, change the scalar to render it within range
-    let mut distancescalar = 1.0;
-    
-    //if the distance of the que is less than 2 units away from the piece, make it two units away
-    if curtotaldistance <= 1.0{
-        distancescalar = 1.0 / curtotaldistance ;
-    }
-    
-    
-    //0 + the ratio of the hypotenuse length to x length * cue length
-    let xcuedistance = (reldistx / curtotaldistance ) * 1.0 ;
-    //0 + the ratio of the hypotenuse length to y length * cue length
-    let ycuedistance = (reldisty / curtotaldistance ) * 1.0 ;
-    
-    
-    //i want it to circle around the selected pieces position
-    //facing inwards
-    
-    let xdistancefromselected = (reldistx * distancescalar) + xcuedistance;
-    let zdistancefromselected = (reldisty * distancescalar) + ycuedistance;
-    
-    let xrotation = reldistx.atan2(reldisty);
-    
-    
-    
-    let position = (piecepos.0 + xdistancefromselected, 0.8, piecepos.1 + zdistancefromselected);
-    let rotation = (0.0, xrotation, 0.0);
-    
-    
-    
-    return (position, rotation) ;
-    
-}
-
-
-
-
-
 
 
 

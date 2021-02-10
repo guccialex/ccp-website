@@ -21,7 +21,6 @@ mod appearancestate;
 
 
 use appearancestate::FullAppearanceState;
-use appearancestate::AppearanceData;
 
 
 use super::ObjectType;
@@ -68,7 +67,6 @@ impl LocalGameInterface{
     pub fn tick(&mut self) {
         
         self.thegame.tick();
-        
     }
     
     
@@ -104,6 +102,8 @@ impl LocalGameInterface{
         
         //if there is a player input that lets object1 perform some action on object 2
         if let Some(playerinput) = objecttoinput.get(&object2){
+            
+            //panic!( "input sent {:?}", playerinput.clone()  );
             
             return self.try_to_perform_input( playerinput.clone() );
         };
@@ -169,7 +169,6 @@ impl LocalGameInterface{
         
         let input = PlayerInput::settledebt(pieces);
         
-        
         return self.try_to_perform_input(input);
     }
     
@@ -182,7 +181,6 @@ impl LocalGameInterface{
         if let Some(validinput) = self.thegame.receive_input(self.playerid, playerinput.clone()){
             
             return Some(validinput);
-            
         }
         else{
             return None;
@@ -201,13 +199,24 @@ impl LocalGameInterface{
         let mut toreturn = FullAppearanceState::new();
         
         
+        if let Some(winner) = self.thegame.is_game_over(){
+            
+            toreturn.player_won(winner);
+        }
         
-        
-        
-        toreturn.new_deck();
+
+
+        toreturn.new_deck( self.thegame.can_player_draw(&self.playerid) );
+
+
+
         
         //add the timer for the player and the opponent
         {
+            
+            let activeplayers = self.thegame.get_active_players();
+            
+            
             let player1totaltimeleft = self.thegame.get_players_total_ticks_left(1);
             let iscurrentlyturn = self.thegame.get_players_turn_ticks_left(1) > 0;
             toreturn.new_timer(1, player1totaltimeleft, iscurrentlyturn);
@@ -216,9 +225,22 @@ impl LocalGameInterface{
             let player2totaltimeleft = self.thegame.get_players_total_ticks_left(2);
             let iscurrentlyturn = self.thegame.get_players_turn_ticks_left(2) > 0;
             toreturn.new_timer(2, player2totaltimeleft, iscurrentlyturn);
+            
+            
+            /*
+            if activeplayers.contains(&1){
+                
+                toreturn.set_gameobject_colour("player1timer".to_string(), (0,255,0));
+            }
+            
+            if activeplayers.contains(&2){
+                
+                toreturn.set_gameobject_colour("player2timer".to_string(), (0,255,0));
+            }
+            */
+            
+            
         }        
-        
-        
         
         
         
@@ -233,7 +255,6 @@ impl LocalGameInterface{
             
             let position = self.thegame.get_board_game_object_translation( boardobjectid );
             let rotation = self.thegame.get_board_game_object_rotation( boardobjectid );
-            let ownerid = self.thegame.get_board_game_object_owner(boardobjectid);
             
             
             
@@ -259,8 +280,23 @@ impl LocalGameInterface{
             
             if let ObjectType::piece(_) = gameobjectid{
                 
-                let piecetypename = self.thegame.get_piece_type_name( boardobjectid );    
-                toreturn.new_piece( gameobjectname, piecetypename, position, rotation, ownerid );
+                
+                let ownerid;
+                
+                if let Some(playerid) = self.thegame.get_board_game_object_owner(boardobjectid){
+                    
+                    ownerid = playerid;
+                }
+                else{
+                    ownerid = 100;
+                }
+                
+                if let Some(piecetypename) = self.thegame.get_piece_type_name( boardobjectid ){
+                    
+                    toreturn.new_piece( gameobjectname, piecetypename, position, rotation, ownerid );
+                    
+                }
+                
                 
             }
             else if let ObjectType::boardsquare(_) = gameobjectid{
@@ -277,57 +313,61 @@ impl LocalGameInterface{
         for cardobjectid in cardobjectids{
             
             
-            let card = self.thegame.get_card_by_id(cardobjectid);
-            
-            let cardtexture = LocalGameInterface::get_name_of_cards_texture(&card);
-            
-            
-            let (field, cardposition, fieldsize) = self.thegame.where_is_card(cardobjectid);
-            
-            
-            let gameobjectid = ObjectType::card(cardobjectid);
-            
-            let gameobjectname = gameobjectid.to_objectname();
-            
-            
-            
-            let mut xpos = cardposition as f32 * 2.0;
-            let ypos = 0.0;
-            let zpos;
-            
-            let xrot = 0.0;
-            let yrot = 0.0;
-            let zrot = 0.0;
-            
-            
-            if field == 1{
-                zpos = -6.0;
+            if let Some(card) = self.thegame.get_card_by_id(&cardobjectid){
+                
+                
+                let cardtexture = LocalGameInterface::get_name_of_cards_texture(&card);
+                
+                let (field, cardposition, fieldsize) = self.thegame.where_is_card(cardobjectid).unwrap();
+                
+                
+                let gameobjectid = ObjectType::card(cardobjectid);
+                
+                let gameobjectname = gameobjectid.to_objectname();
+                
+                
+                
+                let mut xpos = cardposition as f32 * 2.0;
+                let ypos = 0.0;
+                let zpos;
+                
+                let xrot = 0.0;
+                let yrot = 0.0;
+                let zrot = 0.0;
+                
+                
+                if field == 1{
+                    zpos = -6.0;
+                }
+                else if field == 2{
+                    zpos = 6.0;
+                }
+                else if field == 3{
+                    zpos = -3.0;
+                    xpos += 5.5;
+                }
+                else if field == 4{
+                    zpos = 3.0;
+                    xpos += 5.5;
+                }
+                else{
+                    zpos = 0.0;
+                    xpos += 5.5;
+                }
+                
+                
+                let pos = (xpos, ypos, zpos);
+                let rot = (xrot, yrot, zrot);
+                
+                
+                
+                toreturn.new_card( gameobjectname, pos, rot, cardtexture );     
+                
             }
-            else if field == 2{
-                zpos = 6.0;
-            }
-            else if field == 3{
-                zpos = -3.0;
-                xpos += 5.5;
-            }
-            else if field == 4{
-                zpos = 3.0;
-                xpos += 5.5;
-            }
-            else{
-                zpos = 0.0;
-                xpos += 5.5;
-            }
             
-            
-            let pos = (xpos, ypos, zpos);
-            let rot = (xrot, yrot, zrot);
-            
-            
-            
-            toreturn.new_card( gameobjectname, pos, rot, cardtexture );            
         }
-        
+
+
         
         
         
@@ -444,16 +484,17 @@ impl LocalGameInterface{
             
             
             //if there is a selectedobject and it is a piece
-            if let Some( ObjectType::piece(_) ) = clientstate.selectedobject{
+            if let Some( ObjectType::piece(pieceid) ) = clientstate.selectedobject{
                 
                 let (reldistx, reldisty) = dragged.relativepos;
-
+                
                 //get the position of the selected piece
-                let selectedposition = self.get_object_flat_plane_position( clientstate.selectedobject.unwrap() );
+                
+                let (xpos, zpos, _) = self.thegame.get_board_game_object_translation( pieceid );
                 
                 //get the position and rotation of the cue
-                let (position, rotation) = get_position_and_rotation_of_cue_indicator(selectedposition, reldistx, reldisty);
-
+                let (position, rotation) = get_position_and_rotation_of_cue_indicator( (xpos, zpos) , reldistx, reldisty);
+                
                 //add the cue to the objects to be rendered
                 toreturn.new_cue(position, rotation);
             }
@@ -522,17 +563,7 @@ impl LocalGameInterface{
     
     
     
-    
-    
-    fn get_value_of_offered_pieces(&self, pieces: Vec<u16>) -> Option<u8>{
-        
-        self.thegame.get_value_of_offered_pieces(self.playerid, pieces)
-    }
-    
-    fn get_cost_to_check(&self) -> Option<u8>{
-        
-        self.thegame.get_cost_to_check(&self.playerid)
-    }
+    /*
     
     //returns true if i am the owner of this object
     //OR if its an object which im allowed to select, like raise, check, deck
@@ -574,8 +605,9 @@ impl LocalGameInterface{
         
         
         return false;
-        
     }
+    */
+    
     
     //if this piece can be proposed to be offered by this player
     pub fn can_piece_be_offered(&self, pieceid: u16) -> bool{
@@ -601,6 +633,8 @@ impl LocalGameInterface{
             
             //get the actions allowed by the piece
             let actionsandobjects = self.thegame.get_actions_allowed_by_piece(pieceid);
+
+            //panic!("actions allowed {:?}", actionsandobjects);
             
             //for every action allowed, get the objectid of the board square and the piece id associated it can capture
             for (action, objectids) in actionsandobjects.1{
@@ -635,7 +669,7 @@ impl LocalGameInterface{
         else if let ObjectType::card(cardid) = objectid{
             
             //get the pieces and squares actable by the card
-            let idtoinput = self.thegame.get_boardobject_actions_allowed_by_card(self.playerid, cardid);
+            let idtoinput = self.thegame.get_boardobject_actions_allowed_by_card(self.playerid, &cardid);
             
             
             for (id, input) in idtoinput{
@@ -663,20 +697,8 @@ impl LocalGameInterface{
         toreturn
     }
     
-    fn get_this_objects_selectable_objects(&self, objectid: ObjectType) -> Vec<ObjectType>{
-        
-        let objecttoinput = self.get_inputs_of_object(objectid);
-        
-        let mut toreturn = Vec::new();
-        
-        for (objectid, input) in objecttoinput{
-            toreturn.push(objectid);
-        };
-        
-        toreturn
-        
-    }
     
+    /*
     //returns if this piece can be flicked or not
     fn can_piece_be_flicked(&self, pieceid: u16) -> bool{
         
@@ -689,76 +711,10 @@ impl LocalGameInterface{
         
         return false;
     }
+    */
     
     
-    //get a list of each object in the game by id (objecttype)
-    //every piece, board square, and card
-    fn get_objects(&self) -> Vec<ObjectType>{
-        
-        let boardobjectids = self.thegame.get_board_game_object_ids();
-        let cardobjectids = self.thegame.get_card_ids();
-        
-        let mut toreturn = Vec::new();
-        
-        
-        for boardobjectid in boardobjectids{
-            
-            //get if this is a card or a boardsquare
-            if self.thegame.is_board_game_object_piece(boardobjectid){
-                let objectid = ObjectType::piece(boardobjectid);
-                
-                toreturn.push(objectid);
-            }
-            else if self.thegame.is_board_game_object_square(boardobjectid){
-                let objectid = ObjectType::boardsquare(boardobjectid);
-                
-                toreturn.push(objectid);
-            };
-            
-            
-        };
-        
-        for cardobjectid in cardobjectids{
-            let objectid = ObjectType::card(cardobjectid);
-            
-            toreturn.push(objectid);
-        };
-        
-        
-        
-        toreturn
-    }
     
-    //get an objects flat position on the plane
-    fn get_object_flat_plane_position(&self, objectid: ObjectType) -> (f32,f32){
-        
-        if let ObjectType::piece(objectid) = objectid{
-            
-            //get its position
-            let (xpos, ypos, zpos) = self.thegame.get_board_game_object_translation(objectid);
-            
-            return  (xpos,zpos ) ;            
-        }
-        
-        (0.0,0.0)
-    }
-    
-    fn get_appearance_id_of_card(card: &Card) -> u32{
-        
-        //giving a card of every suit and value a unique ID
-        let toreturn =  4 * (card.numbervalue() -1) + card.suitvalue()  + 1;
-        
-        toreturn as u32
-    }
-    
-    //get the name of this cards texture
-    fn get_name_of_cards_texture(card: &Card) -> String{
-        
-        let cardappearanceid = LocalGameInterface::get_appearance_id_of_card(card);
-        let cardappearancestring = format!("{:03}", cardappearanceid );
-        "cardart/card_".to_string() + &cardappearancestring + ".jpg"
-        
-    }
     
     //returns whether this object exists in the game
     fn does_object_still_exist(&self, object: ObjectType) -> bool{
@@ -784,6 +740,38 @@ impl LocalGameInterface{
         };
     }
     
+    
+    
+    
+    fn get_this_objects_selectable_objects(&self, objectid: ObjectType) -> Vec<ObjectType>{
+        
+        let objecttoinput = self.get_inputs_of_object(objectid);
+        
+        let mut toreturn = Vec::new();
+        
+        for (objectid, input) in objecttoinput{
+            toreturn.push(objectid);
+        };
+        
+        toreturn
+    }
+    
+    //this should be moved into the "card" class methods
+    fn get_appearance_id_of_card(card: &Card) -> u32{
+        
+        //giving a card of every suit and value a unique ID
+        let toreturn =  4 * (card.numbervalue() -1) + card.suitvalue()  + 1;
+        toreturn as u32
+    }
+    
+    //get the name of this cards texture
+    fn get_name_of_cards_texture(card: &Card) -> String{
+        
+        let cardappearanceid = LocalGameInterface::get_appearance_id_of_card(card);
+        let cardappearancestring = format!("{:03}", cardappearanceid );
+        "cardart/card_".to_string() + &cardappearancestring + ".jpg"
+        
+    }
     
     
 }
