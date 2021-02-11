@@ -16,7 +16,7 @@ RUN wasm-pack build wasm_builder --target web --release
 
 
 #delete the old wasm files
-RUN rm static/chesscheckersgame_static/wasmfiles/ -r
+RUN rm static/chesscheckersgame_static/wasmfiles/ -rf
 #and remake the empty directory
 RUN mkdir static/chesscheckersgame_static/wasmfiles/
 #copy the package created into the frontend wasm file directory
