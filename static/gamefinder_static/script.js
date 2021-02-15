@@ -41,6 +41,10 @@ xmlHttp.onreadystatechange = function() {
     let fulladdress = gamefilesurl + querystring;
 
     console.log(fulladdress);
+
+
+    //change the "connect to public game" button to green
+    //and then when you click it again it sends you to the game
     
 
     window.open(fulladdress); 

@@ -13,6 +13,7 @@ use physicsengine::BlackJackAction;
 use physicsengine::PokerAction;
 use physicsengine::CardAction;
 
+use physicsengine::VisibleGameObjectType;
 //use std::collections::HashSet;
 
 
@@ -21,7 +22,7 @@ mod appearancestate;
 
 
 use appearancestate::FullAppearanceState;
-
+use appearancestate::AppearanceData;
 
 use super::ObjectType;
 pub use super::ClientState;
@@ -41,6 +42,13 @@ pub struct LocalGameInterface{
     thegame: MainGame,
     
     
+    //the appearance of each 
+    prevvisiblegameobject: HashMap< ObjectType, VisibleGameObjectType>,
+    
+    
+    //if they have the same mesh or texture as before, remove its
+    prevappearance: HashMap<String, AppearanceData>,
+    
 }
 
 
@@ -58,6 +66,10 @@ impl LocalGameInterface{
             
             playerid: playerid,
             thegame:thegame,
+            
+            prevvisiblegameobject: HashMap::new(),
+            
+            prevappearance: HashMap::new(),
             
         }
     }
@@ -196,298 +208,57 @@ impl LocalGameInterface{
     pub fn get_full_appearance_state(&mut self, clientstate: &ClientState) -> FullAppearanceState{
         
         
+        let ccpgamestate = self.thegame.get_visible_game_state(&self.playerid);
+        
         let mut toreturn = FullAppearanceState::new();
         
         
-        if let Some(winner) = self.thegame.is_game_over(){
-            
+        if let Some(winner) = ccpgamestate.isgameover{
             toreturn.player_won(winner);
         }
         
-
-
-        toreturn.new_deck( self.thegame.can_player_draw(&self.playerid) );
-
-
-
-
-        //complete steps to render the state of the game
-
-        /*
-        draw each piece
-
-        draw each board square of the right colour
-
-
-        */
-
-
-
         
-        //add the timer for the player and the opponent
-        {
-            
-            let activeplayers = self.thegame.get_active_players();
-            
-            
-            let player1totaltimeleft = self.thegame.get_players_total_ticks_left(1);
-            let iscurrentlyturn = self.thegame.get_players_turn_ticks_left(1) > 0;
-            toreturn.new_timer(1, player1totaltimeleft, iscurrentlyturn);
-            
-            
-            let player2totaltimeleft = self.thegame.get_players_total_ticks_left(2);
-            let iscurrentlyturn = self.thegame.get_players_turn_ticks_left(2) > 0;
-            toreturn.new_timer(2, player2totaltimeleft, iscurrentlyturn);
-            
-            
-            /*
-            if activeplayers.contains(&1){
-                
-                toreturn.set_gameobject_colour("player1timer".to_string(), (0,255,0));
-            }
-            
-            if activeplayers.contains(&2){
-                
-                toreturn.set_gameobject_colour("player2timer".to_string(), (0,255,0));
-            }
-            */
-            
-            
-        }        
+        toreturn.new_deck( ccpgamestate.drawactionvalid );
+        
+        toreturn.new_timer( 1, ccpgamestate.player1totalticksleft, ccpgamestate.playerswithactiveturns.contains(&1) );
+        toreturn.new_timer( 2, ccpgamestate.player2totalticksleft, ccpgamestate.playerswithactiveturns.contains(&2) );
         
         
         
-        let boardobjectids = self.thegame.get_board_game_object_ids();
-        let cardobjectids = self.thegame.get_card_ids();
         
         
-        
-        //each board objects
-        for boardobjectid in boardobjectids{
-            
-            
-            let position = self.thegame.get_board_game_object_translation( boardobjectid );
-            let rotation = self.thegame.get_board_game_object_rotation( boardobjectid );
-            
-            
-            
+        for boardgameobject in &ccpgamestate.boardobjects{
             
             let gameobjectid;
-            let gameobjectname;
             
-            //get what type of board object it is
+            //if the texture is the same as the last
             
-            if self.thegame.is_board_game_object_piece(boardobjectid){
-                gameobjectid = ObjectType::piece(boardobjectid);
-                gameobjectname = gameobjectid.to_objectname();
+            if let physicsengine::VisibleGameObjectType::Piece(_) = &boardgameobject.objecttype{
+                gameobjectid = ObjectType::piece( boardgameobject.id );            
             }
-            else if self.thegame.is_board_game_object_square(boardobjectid){
-                gameobjectid = ObjectType::boardsquare(boardobjectid);
-                gameobjectname = gameobjectid.to_objectname();
+            else if let physicsengine::VisibleGameObjectType::Square(_) = &boardgameobject.objecttype{
+                gameobjectid = ObjectType::boardsquare( boardgameobject.id );
             }
             else{
-                panic!("What else could it be?");
+                panic!("not a piece or square. huh?");
             }
             
             
+            let gameobjectname = gameobjectid.to_objectname();
             
-            if let ObjectType::piece(_) = gameobjectid{
+            
+            
+            if let physicsengine::VisibleGameObjectType::Piece(pieceobject) = &boardgameobject.objecttype{
                 
-                
-                let ownerid;
-                
-                if let Some(playerid) = self.thegame.get_board_game_object_owner(boardobjectid){
-                    
-                    ownerid = playerid;
-                }
-                else{
-                    ownerid = 100;
-                }
-                
-                if let Some(piecetypename) = self.thegame.get_piece_type_name( boardobjectid ){
-                    
-                    toreturn.new_piece( gameobjectname, piecetypename, position, rotation, ownerid );
-                    
-                }
-                
-                
+                toreturn.new_piece( gameobjectname, pieceobject.typename.clone(), boardgameobject.position, boardgameobject.rotation, pieceobject.owner );
             }
-            else if let ObjectType::boardsquare(_) = gameobjectid{
+            else if let physicsengine::VisibleGameObjectType::Square(squareobject) = &boardgameobject.objecttype{
                 
-                let issquarewhite = self.thegame.is_boardsquare_white( boardobjectid );
-                toreturn.new_boardsquare( gameobjectname, position, rotation, issquarewhite );
-            }
+                toreturn.new_boardsquare( gameobjectname, boardgameobject.position, boardgameobject.rotation, squareobject.iswhite );
+            };
             
             
-        }
-        
-        
-        //each card object
-        for cardobjectid in cardobjectids{
-            
-            
-            if let Some(card) = self.thegame.get_card_by_id(&cardobjectid){
-                
-                
-                let cardtexture = LocalGameInterface::get_name_of_cards_texture(&card);
-                
-                let (field, cardposition, fieldsize) = self.thegame.where_is_card(cardobjectid).unwrap();
-                
-                
-                let gameobjectid = ObjectType::card(cardobjectid);
-                
-                let gameobjectname = gameobjectid.to_objectname();
-                
-                
-                
-                let mut xpos = cardposition as f32 * 2.0;
-                let ypos = 0.0;
-                let zpos;
-                
-                let xrot = 0.0;
-                let yrot = 0.0;
-                let zrot = 0.0;
-                
-                
-                if field == 1{
-                    zpos = -6.0;
-                }
-                else if field == 2{
-                    zpos = 6.0;
-                }
-                else if field == 3{
-                    zpos = -3.0;
-                    xpos += 5.5;
-                }
-                else if field == 4{
-                    zpos = 3.0;
-                    xpos += 5.5;
-                }
-                else{
-                    zpos = 0.0;
-                    xpos += 5.5;
-                }
-                
-                
-                let pos = (xpos, ypos, zpos);
-                let rot = (xrot, yrot, zrot);
-                
-                
-                
-                toreturn.new_card( gameobjectname, pos, rot, cardtexture );     
-                
-            }
-            
-        }
-
-
-        
-        
-        
-        
-        
-        //change the colour of every piece offered
-        for pieceid in &clientstate.piecesforoffer{
-            
-            let objecttype = ObjectType::piece(*pieceid);
-            let highlightedobjectname = objecttype.to_objectname();
-            
-            toreturn.set_gameobject_colour(highlightedobjectname, (0,255,0));
-        }
-        
-        
-        
-        //if an object is selected
-        if let Some(selectedgameobject) = clientstate.selectedobject{
-            
-            
-            //make the selected game object yellow
-            toreturn.set_gameobject_colour( selectedgameobject.to_objectname(), (10,10,254) );
-            
-            
-            
-            let highlightedobjects = self.get_this_objects_selectable_objects(selectedgameobject);
-            
-            //make those highlighted objects green
-            for highlightedobject in highlightedobjects{
-                
-                let highlightedobjectname = highlightedobject.to_objectname();
-                toreturn.set_gameobject_colour(highlightedobjectname, (0,255,0));
-            }
-        }
-        
-        
-        
-        
-        
-        let debtowed = self.thegame.get_debt_of_player(&self.playerid);
-        
-        if debtowed != 0{
-            toreturn.new_debt_owed_button(debtowed);            
-        }
-        else{
-            
-            //if theres a poker game going on
-            //give the check, fold and raise buttons
-            if self.thegame.is_pokergame_ongoing() {
-                
-                toreturn.new_check_button();
-                
-                toreturn.new_fold_button();
-                
-                toreturn.new_raise_button();
-                
-                toreturn.new_cost_to_check(debtowed);
-            }
-            
-        }
-        
-        
-        
-        
-        
-        let vecofpieces: Vec<u16> = clientstate.piecesforoffer.clone().into_iter().collect();
-        
-        let valueoffered = self.thegame.get_value_of_offered_pieces(self.playerid, vecofpieces);
-        
-        let valuetocheck = self.thegame.get_cost_to_check(&self.playerid);
-        
-        
-        if let Some(valueoffered) = valueoffered{
-            if let Some(valuetocheck) = valuetocheck{
-                
-                toreturn.new_piece_value_offered(valueoffered);
-                
-                
-                
-                
-                /*
-                this bit kinda contains game logic that I should really have in the shared backend/client game code
-                
-                i guess separate exposed functions for:
-                can player check? can player raise? can player fold?
-                that return bools
-                */
-                
-                
-                //highlight the check button if value offered equals value to check
-                if valueoffered == valuetocheck{
-                    toreturn.set_gameobject_colour("check button".to_string(),  (0,255,0));
-                }
-                
-                //highlight the raise button if the value offered is greater than the value to check
-                if valueoffered > valuetocheck{
-                    toreturn.set_gameobject_colour("raise button".to_string(), (0,255,0));
-                }
-                
-                //highlight the fold button if the value offered is 0
-                if valueoffered == 0{
-                    toreturn.set_gameobject_colour("fold button".to_string(), (0,255,0));
-                }
-                
-                
-            }
-        }
+        };
         
         
         
@@ -503,21 +274,44 @@ impl LocalGameInterface{
                 
                 //get the position of the selected piece
                 
-                let (xpos, zpos, _) = self.thegame.get_board_game_object_translation( pieceid );
+                if let Some( (xpos, zpos) ) = ccpgamestate.get_piece_plane_position( pieceid ){
+                    
+                    //get the position and rotation of the cue
+                    let (position, rotation) = get_position_and_rotation_of_cue_indicator( (xpos, zpos) , reldistx, reldisty);
+                    
+                    //add the cue to the objects to be rendered
+                    toreturn.new_cue(position, rotation);
+                    
+                    
+                };
                 
-                //get the position and rotation of the cue
-                let (position, rotation) = get_position_and_rotation_of_cue_indicator( (xpos, zpos) , reldistx, reldisty);
-                
-                //add the cue to the objects to be rendered
-                toreturn.new_cue(position, rotation);
             }
         }
         
         
         
+        //if an object is selected
+        if let Some(selectedgameobject) = clientstate.selectedobject{
+            
+            //make the selected game object yellow
+            toreturn.set_gameobject_colour( selectedgameobject.to_objectname(), (10,10,254) );
+            
+            let highlightedobjects = self.get_this_objects_selectable_objects(selectedgameobject);
+            
+            //make those highlighted objects green
+            for highlightedobject in highlightedobjects{
+                
+                let highlightedobjectname = highlightedobject.to_objectname();
+                toreturn.set_gameobject_colour(highlightedobjectname, (0,255,0));
+            }
+        }
         
+        
+        
+        self.prevappearance = toreturn.remove_unchanged_shapes_and_textures( &self.prevappearance );
         
         toreturn
+        
     }
     
     
@@ -646,7 +440,7 @@ impl LocalGameInterface{
             
             //get the actions allowed by the piece
             let actionsandobjects = self.thegame.get_actions_allowed_by_piece(pieceid);
-
+            
             //panic!("actions allowed {:?}", actionsandobjects);
             
             //for every action allowed, get the objectid of the board square and the piece id associated it can capture

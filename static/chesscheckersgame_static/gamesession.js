@@ -33,10 +33,10 @@ if ( (urlParams.has("addressandport") === true) && (urlParams.has("gamepassword"
     run(addressandport, gamepassword);
 }
 else{
-
     
-
-
+    
+    
+    
     run_serverless()
 }
 
@@ -123,25 +123,25 @@ async function start(socket, playerid){
     
     
     let canvas = document.getElementById("renderCanvas"); // Get the canvas element
-
-
+    
+    
     //canvas.style.width = "800px";
     //canvas.style.height = "400px"; 
-
+    
     let engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
-
+    
     canvas.style.width = '100%';
     canvas.style.height = '100%';
     
     console.log("started");
     
     let mygame = new GameInterface(engine, socket, playerid);
-
-
-        
+    
+    
+    
     //if its being started with a socket, and connected to the server
     if (socket != null){
-
+        
         //create an event listener that when a message is received, it is sent to the game
         mygame.socket.onmessage = function (event) {
             
@@ -255,10 +255,10 @@ class GameApperance{
         
         //get the canvas for this engine to attach a control tos
         let canvas = engine.getRenderingCanvas();
-
-
-
-
+        
+        
+        
+        
         
         
         camera.attachControl(canvas, true);
@@ -270,14 +270,14 @@ class GameApperance{
         var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
         light.diffuse = new BABYLON.Color3(1.0, 1.0, 1.0);
         light.specular = new BABYLON.Color3(0.0, 0.0, 0.0);
-        light.intensity = 2.5;
+        light.intensity = 1.5;
         
         //var light = new BABYLON.DirectionalLight("DirectionalLight", new BABYLON.Vector3(0, -1, 0), scene);
         //light.intensity = 0.5;
         
         
         this.advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
-
+        
         this.wonbutton = null;
         
         this.thegameinterface = gameinterface;
@@ -292,7 +292,6 @@ class GameApperance{
         let mesh = BABYLON.MeshBuilder.CreateBox("plane", {height: 0.008, width: 100.98, depth: 100.08 }, this.scene);
         mesh.material = new BABYLON.StandardMaterial("bs_mat", this.scene);
         mesh.material.alpha = 0.00;
-        mesh.material.diffuseColor = BABYLON.Color3.Gray();
         mesh.position.y = 0.75;
         
         
@@ -307,20 +306,29 @@ class GameApperance{
         skyboxMaterial.disableLighting = true;
         skybox.material = skyboxMaterial;
         
+        
         //this.scene.freezeActiveMeshes();
         
+        /*
         var image = new BABYLON.GUI.Image("overlay", "testimage.png");
         image.width = "20%";
         image.height = "20%";
         image.left = "-40%";
         image.top = "-40%";
         this.advancedTexture.addControl(image);
+        */
         
         
         
-        var options = BABYLON.SceneOptimizerOptions.LowDegradationAllowed(30, 30);
+        var options = BABYLON.SceneOptimizerOptions.ModerateDegradationAllowed(30, 1000);
+        
+        //hardware scaling is the resolution
+        //so 2.0 means rendering at half resolution if slow
+        options.addOptimization(new BABYLON.HardwareScalingOptimization(0, 2.0));
+        
         
         BABYLON.SceneOptimizer.OptimizeAsync(scene, options);
+        
     }
     
     
@@ -331,29 +339,25 @@ class GameApperance{
         let objectspassedtorender = [];
         
         
-        
-        //for each object in the appearance data
+        //for each object with shape data
         for (let objectdata of appearancedata.objects){
             
-            //get the name of the object
-            let objectname = objectdata.name;
+            //console.log("shape updated");
+
             
-            //get the mesh if it exists
-            let objectmesh = this.scene.getMeshByName(objectname);
-            
-            
-            //console.log(objectdata);
-            
-            
-            
-            //if the mesh doesnt exist yet
-            if (objectmesh == null){
+            if (objectdata.shapetype != null) {
+                
+                //get the name of the object
+                let objectname = objectdata.name;
+                
+                //the old mesh that might or might not exists
+                let objectmesh = this.scene.getMeshByName(objectname);
+                
                 
                 let shapetype = objectdata.shapetype;
-
-
+                
                 if (shapetype.Cube != undefined){
-
+                    
                     let shapedata = shapetype.Cube;    
                     
                     let options = {
@@ -367,7 +371,7 @@ class GameApperance{
                 else if (shapetype.Cylinder != undefined){
                     
                     let shapedata = shapetype.Cylinder;
-
+                    
                     let options = {
                         height : shapedata[0],
                         diameter  : shapedata[1],
@@ -378,7 +382,7 @@ class GameApperance{
                 else if (shapetype.Circle != undefined){
                     
                     let shapedata = shapetype.Circle;
-
+                    
                     let options = {
                         diameter: shapedata[0]
                     };
@@ -386,11 +390,80 @@ class GameApperance{
                     objectmesh = BABYLON.MeshBuilder.CreateSphere(objectname, options, this.scene);
                 }
                 
+            }
+        }
+        
+
+
+        
+        //for each object with texture data
+        for (let objectdata of appearancedata.objects){
+            
+            
+            if (objectdata.texture != null) {
+                
+                //get the name of the object
+                let objectname = objectdata.name;
+                
+                //the old mesh that might or might not exists
+                let objectmesh = this.scene.getMeshByName(objectname);
+                
+
+
+                objectmesh.material = new BABYLON.StandardMaterial("bs_mat", this.scene);
+                
+                let colour = new BABYLON.Color3( objectdata.texture.colour[0] / 255, objectdata.texture.colour[1] / 255, objectdata.texture.colour[2] /255);
+                objectmesh.material.diffuseColor = colour;
+                
+
+
+                //if this object has an image for its texture
+                if (objectdata.texture.image != null){
+                
+                    //if the object doesnt have a texture set yet
+                    objectmesh.material.ambientTexture = new BABYLON.Texture(objectdata.texture.image, this.scene);
+                }
+
+
+
+            
+            
+                //if this object has text
+                let textdata = objectdata.texture.text;
+                if (textdata != null){
+                
+                    let texture = new BABYLON.DynamicTexture("dynamic texture", {width:100, height:100}, this.scene);   
+                    objectmesh.material.diffuseTexture = texture;
+                
+                    let text = textdata.text;
+                    let font = "bold "+textdata.fontsize+"px monospace";
+                    let xpos = textdata.position[0];
+                    let ypos = textdata.position[1];
+                
+                    objectmesh.material.diffuseTexture.drawText(text, xpos, ypos, font, "white", "transparent", true, true);
+                
+                    objectmesh.material.useAlphaFromDiffuseTexture = true;
+                
+                }
+            
                 
                 
-                console.log(objectmesh);
             }
             
+            
+        }
+        
+        
+        
+        
+        //update every objects position
+        for (let objectdata of appearancedata.objects){
+            
+            //get the name of the object
+            let objectname = objectdata.name;
+            
+            //the old mesh that might or might not exists
+            let objectmesh = this.scene.getMeshByName(objectname);
             
             //if this mesh was just created, or the shape needs to updated
             objectmesh.position.x = (objectmesh.position.x * 0.5) + (objectdata.position[0] * 0.5);
@@ -401,59 +474,16 @@ class GameApperance{
             objectmesh.rotation.x = objectdata.rotation[0];
             objectmesh.rotation.y = objectdata.rotation[1];
             objectmesh.rotation.z = objectdata.rotation[2];
-            
-            
-            
-            
-            
-            
-            //if this mesh doesnt have a material
-            if (objectmesh.material == null){
-                
-                objectmesh.material = new BABYLON.StandardMaterial("bs_mat", this.scene);
-            }
-            
-
-            let colour = new BABYLON.Color3( objectdata.texture.colour[0] / 255, objectdata.texture.colour[1] / 255, objectdata.texture.colour[2] /255);
-            objectmesh.material.diffuseColor = colour;
-            
-            
-            
-            //if this object has an image for its texture
-            if (objectdata.texture.image != null){
-
-                //if the object doesnt have a texture set yet
-                objectmesh.material.ambientTexture = new BABYLON.Texture(objectdata.texture.image, this.scene);
-            }
-            
-            
-            
-            //if this object has text
-            let textdata = objectdata.texture.text;
-            if (textdata != null){
-                
-                let texture = new BABYLON.DynamicTexture("dynamic texture", {width:100, height:100}, this.scene);   
-                objectmesh.material.diffuseTexture = texture;
-                
-                let text = textdata.text;
-                let font = "bold "+textdata.fontsize+"px monospace";
-                let xpos = textdata.position[0];
-                let ypos = textdata.position[1];
-                
-                objectmesh.material.diffuseTexture.drawText(text, xpos, ypos, font, "white", "transparent", true, true);
-                
-                objectmesh.material.useAlphaFromDiffuseTexture = true;
-                
-            }
-            
-            
-            
-            
-            
-            
-            objectspassedtorender.push(objectname);
         }
         
+        
+
+        let objectstokeep = new Map();
+        
+        for (let objectdata of appearancedata.objects){
+
+            objectstokeep.set(objectdata.name);
+        }
         
         
         //and each object that wasn't passed in for this tick, remove it from the list of meshes
@@ -461,8 +491,8 @@ class GameApperance{
         for (let mesh of this.scene.meshes) {
             
             //if the objects passed to render includes the current mesh
-            if (objectspassedtorender.includes(mesh.name)) {
-                //do nothing            
+            if (objectstokeep.has(mesh.name)) {
+                //do nothing
             }
             else{
                 
@@ -476,27 +506,25 @@ class GameApperance{
             }
         }
         
-
-
- 
+        
         //check if either player won
         if (appearancedata.winningplayer != null){
-
+            
             //if it doesnt exist already yet
             if (this.wonbutton == null){
-
+                
                 var button1 = BABYLON.GUI.Button.CreateSimpleButton("wongui", "Congrats player " + appearancedata.winningplayer + " you won. We can all go home now");
                 button1.width = "550px"
                 button1.height = "200px";
                 button1.color = "white";
                 button1.cornerRadius = 20;
                 button1.background = "green";
-
+                
                 this.wonbutton = button1;
-
+                
                 this.advancedTexture.addControl(button1);
             }
-
+            
         }
         
         
@@ -523,8 +551,8 @@ class GameInterface{
     
     
     constructor(engine, socket, playerid){
-
-
+        
+        
         
         //create the "appearance" object for this game, giving it the scene of the engine
         this.gameappearance = new GameApperance(engine, this);
@@ -533,7 +561,7 @@ class GameInterface{
         
         //create the wasm game
         this.wasmgame = FullGame.new(playerid);
-
+        
         
         //if an object is being dragged (if the camera movement is disabled)
         this.draggingobject = false;
@@ -581,21 +609,21 @@ class GameInterface{
         
         //get if any outgoing message is queued to be sent
         if ( this.wasmgame.is_outgoing_socket_message_queued() ){
-
+            
             let message = this.wasmgame.pop_outgoing_socket_message();
             
-
+            
             //if there is a socket for this game
             if (this.socket != null){
-
+                
                 console.log("im sending a websocket message");
-            
+                
                 //and send them to the server
                 this.socket.send( message );
             }
         }
         
-
+        
     }
     
     

@@ -21,7 +21,7 @@ pub struct FullAppearanceState{
     //the position of the camera
     
     //the visible objects
-    objects: Vec<AppearanceData>,
+    pub objects: Vec<AppearanceData>,
 
 
     //if either player won
@@ -57,6 +57,7 @@ impl FullAppearanceState{
     
 }
 
+use std::collections::HashMap;
 
 
 
@@ -82,35 +83,16 @@ impl FullAppearanceState{
     //what colour to tint the object and by what amount (1.0 = 100%, 0.0 = 0%)
     pub fn tint_object_colour(&mut self, objectname: String, colour: (u8, u8, u8), mut tintamount: f32){
         
-        let tintingcolourfloat = (colour.0 as f32, colour.1 as f32, colour.2 as f32);
-
-        //make the tint amount in the appropriate range
-        if tintamount > 1.0{
-            tintamount = 1.0
-        }
-        if tintamount < 0.0{
-            tintamount = 0.0;
-        }
-
-        let tintinverse = 1.0 - tintamount;
-
 
         for curobject in self.objects.iter_mut(){
             
             if curobject.name == objectname{
-                
 
-                let colourfloat = (curobject.texture.colour.0 as f32, curobject.texture.colour.1 as f32, curobject.texture.colour.2 as f32);
-                
-                let mixedr = tintingcolourfloat.0 * tintamount + colourfloat.0 * tintinverse;
-                let mixedg = tintingcolourfloat.1 * tintamount + colourfloat.1 * tintinverse;
-                let mixedb = tintingcolourfloat.2 * tintamount + colourfloat.2 * tintinverse;
-                
-                //make its colour closer to green
-                curobject.texture.colour = (mixedr as u8, mixedg as u8, mixedb as u8);
+                curobject.tint_colour(colour, tintamount);
                 
             }
         }
+
     }
 
 
@@ -125,6 +107,70 @@ impl FullAppearanceState{
         toadd.set_cube( (0.2, 0.2, 1.2) );
         
         self.objects.push(toadd);
+    }
+
+    //remove the shape and texture from an object thats been created
+    pub fn remove_shape(&mut self, objectname: String){
+
+        for curobject in self.objects.iter_mut(){
+            
+            if curobject.name == objectname{
+
+                curobject.shapetype = None;
+            }
+        }
+    }
+
+    pub fn remove_texture(&mut self, objectname: String){
+
+        for curobject in self.objects.iter_mut(){
+            
+            if curobject.name == objectname{
+
+                curobject.texture = None;
+            }
+        }
+
+    }
+
+
+
+    pub fn remove_unchanged_shapes_and_textures(&mut self, prevappearances: & HashMap<String, AppearanceData>) -> HashMap<String, AppearanceData>{
+
+
+        let mut curappearances = HashMap::new();
+
+        for appearancestate in & self.objects{
+
+            curappearances.insert( appearancestate.name.clone(), appearancestate.clone() );
+        };
+
+
+        let curappearances = curappearances;
+
+
+
+        for (curname, curappearance) in & curappearances{
+
+            if let Some(prevappearance) = prevappearances.get( curname){
+
+
+                if prevappearance.shapetype == curappearance.shapetype{
+                    self.remove_shape( curname.clone() );
+                }
+
+                if prevappearance.texture == curappearance.texture{
+
+                    self.remove_texture( curname.clone() );
+                }
+
+            }
+        }
+
+        
+
+        curappearances
+        
     }
     
     pub fn new_deck(&mut self, candraw: bool){
@@ -238,6 +284,9 @@ impl FullAppearanceState{
         
         self.objects.push(toadd);
     }
+
+
+
     
     pub fn new_card(&mut self, objectname: String, position: (f32,f32,f32), mut rotation: (f32,f32,f32), cardtexture: String ) {
         
@@ -274,6 +323,7 @@ impl FullAppearanceState{
         self.objects.push(toadd);
 
     }
+
     
     pub fn new_check_button(&mut self){
 
@@ -423,18 +473,20 @@ impl FullAppearanceState{
 //for babylon to take and display
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
-struct AppearanceData{
+pub struct AppearanceData{
     
     name: String,
     
     position: (f32,f32,f32),
     rotation: (f32,f32,f32),
 
+
+
     //the shape
-    shapetype: ShapeType,
+    shapetype: Option<ShapeType>,
     
     //the texture
-    texture: Texture,
+    texture: Option<Texture>,
 }
 
 
@@ -457,11 +509,10 @@ impl AppearanceData{
             name: objectname,
             position: position,
             rotation: rotation,
-            
 
-            shapetype: ShapeType::Cube(shape),
+            shapetype: None,//ShapeType::Cube(shape),
 
-            texture: texture,
+            texture: None,//texture,
         }
     }
 
@@ -471,43 +522,107 @@ impl AppearanceData{
 
         let shape = CircleShape(diameter);
 
-        self.shapetype = ShapeType::Circle(shape);
+        self.shapetype = Some(ShapeType::Circle(shape));
     }
 
     fn set_cylinder(&mut self, dimensions: (f32,f32) ){
 
         let shape = CylinderShape(dimensions.0, dimensions.1);
 
-        self.shapetype = ShapeType::Cylinder(shape);
+        self.shapetype = Some(ShapeType::Cylinder(shape));
     }
 
     fn set_cube(&mut self, dimensions: (f32,f32,f32)){
 
         let shape = CubeShape(dimensions.0, dimensions.1, dimensions. 2);
 
-        self.shapetype = ShapeType::Cube(shape);
+        self.shapetype = Some(ShapeType::Cube(shape));
     }
 
 
 
     fn set_colour(&mut self, colour: (u8,u8,u8)){
 
-        self.texture.colour = colour;
+        //if texture doesnt exist create it
+        if self.texture.is_none(){
+            self.texture = Some(Texture::default_texture());
+        };
+
+        if let Some(texture) = &mut self.texture{
+            texture.colour = colour;
+        };
+
+    }
+
+
+    fn tint_colour(&mut self, colour: (u8, u8, u8), mut tintamount: f32){
+
+        //if texture doesnt exist create it
+        if self.texture.is_none(){
+            self.texture = Some(Texture::default_texture());
+        };
+
+
+        let tintingcolourfloat = (colour.0 as f32, colour.1 as f32, colour.2 as f32);
+
+        //make the tint amount in the appropriate range
+        if tintamount > 1.0{
+            tintamount = 1.0
+        }
+        if tintamount < 0.0{
+            tintamount = 0.0;
+        }
+
+        let tintinverse = 1.0 - tintamount;
+        
+
+        let colourfloat = (self.texture.as_ref().unwrap().colour.0 as f32,
+        self.texture.as_ref().unwrap().colour.1 as f32,
+        self.texture.as_ref().unwrap().colour.2 as f32);
+        
+        let mixedr = tintingcolourfloat.0 * tintamount + colourfloat.0 * tintinverse;
+        let mixedg = tintingcolourfloat.1 * tintamount + colourfloat.1 * tintinverse;
+        let mixedb = tintingcolourfloat.2 * tintamount + colourfloat.2 * tintinverse;
+        
+
+
+        if let Some(texture) = &mut self.texture{
+            texture.colour = (mixedr as u8, mixedg as u8, mixedb as u8);
+        };
 
     }
 
     fn set_text(&mut self, text: String, position: (f32,f32), fontsize: u32){
 
-        self.texture.text = Some(Text{
-            text: text,
-            position: position,
-            fontsize: fontsize,
-        });
+        //if texture doesnt exist create it
+        if self.texture.is_none(){
+            self.texture = Some(Texture::default_texture());
+        };
+
+
+        if let Some(texture) = &mut self.texture{
+            texture.text = Some(Text{
+                text: text,
+                position: position,
+                fontsize: fontsize,
+            });
+        };
+
     }
 
     fn set_image(&mut self, image: String){
 
-        self.texture.image = Some(image);
+        //if texture doesnt exist create it
+        if self.texture.is_none(){
+            self.texture = Some(Texture::default_texture());
+        };
+
+
+        if let Some(texture) = &mut self.texture{
+            
+            texture.image = Some(image);
+        };
+       
     }
 
 
