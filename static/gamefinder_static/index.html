@@ -1,14 +1,19 @@
 <!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
+
+    <meta http-equiv="Content-Type" charset="utf-8" content="text/html; charset=utf-8"/>
 
     <title>Game Director</title>
 
 
+    <!--
     <base href="./ccpfinder/">
+    -->
+    
 </head>
 
 <body>
@@ -20,13 +25,13 @@
 
     <style>
         body {
-            background-image: url('bg_image.jpg');
+            background-image: url('./bg_image.jpg');
         }
     </style> 
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/psl/1.8.0/psl.min.js" integrity="sha512-dUWRL/cG2lmnjJ8maxI0MRBNTof4gwZTEldCA8MYjzEK3rt8czjmP+NLSzsFGtQhlxuw/Z3glypWwG4967Xq/Q==" crossorigin="anonymous"></script>
         
-    <script src="script.js"></script>
+    <script src="./script.js"></script>
     
     
     
@@ -35,7 +40,7 @@
     <br>
     <br>
     <br>
-    <button onclick="ConnectToPublicGame()">find a public game</button>
+    <button style="height:100px;width:200px" onclick="ConnectToPublicGame()">find a public game</button>
     <br>
     <br>
     <br>
@@ -48,7 +53,7 @@
     <br>
     
     <div id="GameFound">
-        <button onclick="ConnectToFoundGame()">connect to the game found</button>
+        <button style="height:100px;width:200px" onclick="ConnectToFoundGame()">connect to the game found</button>
     </div>
 
     <script>
