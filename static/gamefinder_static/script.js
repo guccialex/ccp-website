@@ -47,9 +47,26 @@ xmlHttp.onreadystatechange = function() {
     //and then when you click it again it sends you to the game
     
 
-    window.open(fulladdress); 
+    //window.open(fulladdress); 
+    var x = document.getElementById("myDIV");
+        if (x.style.display === "none") {
+          x.style.display = "block";
+        } else {
+          x.style.display = "none";
+        }
+
+
+
+
 
 };  
+
+
+function ConnectToFoundGame() {
+
+
+
+}
 
 
 
