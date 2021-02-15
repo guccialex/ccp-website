@@ -1,20 +1,43 @@
 <!doctype html>
 
 <html lang="en">
+
 <head>
-    
     <meta charset="utf-8">
-    
+
     <title>Game Director</title>
-    
 </head>
 
 <body>
+
+    
+
+    <script>
+        //let newbase = window.location.protocol + '//' + window.location.hostname + (window.location.port ? ':' + window.location.port : '' ) + "/ccpfinder";
+   
+        //console.log("the new base is: " + newbase);
+        
+        //document.getElementsByTagName('head')[0].appendChild(base);
+        //document.write("<base href='" + newbase + ">");
+        //<base href="http://localhost:8000/ccpfinder/">
+
+        //this doesnt work either
+        //despair
+        //document.head.innerHTML = document.head.innerHTML + "<base href='" + "sfae" + "' />";
+    </script>
+
+    
+
+
+    <style>
+        body {
+            background-image: url('bg_image.jpg');
+        }
+    </style> 
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/psl/1.8.0/psl.min.js" integrity="sha512-dUWRL/cG2lmnjJ8maxI0MRBNTof4gwZTEldCA8MYjzEK3rt8czjmP+NLSzsFGtQhlxuw/Z3glypWwG4967Xq/Q==" crossorigin="anonymous"></script>
-    
-    
-    <script src="ccpfinder/script.js"></script>
+        
+    <script src="script.js"></script>
     
     
     
@@ -26,14 +49,24 @@
     <button onclick="ConnectToPublicGame()">find a public game</button>
     <br>
     <br>
-    <button onclick="CreatePrivateGame()">create a private game</button>
     <br>
     <br>
-    <input type="text" id="gamepassword" value="password">
-    <button onclick="ConnectToPrivateGame()">join a private game</button>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
     <br>
     
-    <button onclick="ConnectToFoundGame()">game found: connect to the</button>
+    <div id="GameFound">
+        <button onclick="ConnectToFoundGame()">connect to the game found</button>
+    </div>
+
+    <script>
+        var x = document.getElementById("GameFound");
+        x.style.display = "none";
+    </script>
+
     <br>
     
     
