@@ -2,7 +2,7 @@
 
 
 use physicsengine::PlayerInput;
-use physicsengine::Card;
+
 
 use std::collections::HashMap;
 
@@ -415,22 +415,6 @@ impl LocalGameInterface{
         toreturn
     }
     
-    //this should be moved into the "card" class methods
-    fn get_appearance_id_of_card(card: &Card) -> u32{
-        
-        //giving a card of every suit and value a unique ID
-        let toreturn =  4 * (card.numbervalue() -1) + card.suitvalue()  + 1;
-        toreturn as u32
-    }
-    
-    //get the name of this cards texture
-    fn get_name_of_cards_texture(card: &Card) -> String{
-        
-        let cardappearanceid = LocalGameInterface::get_appearance_id_of_card(card);
-        let cardappearancestring = format!("{:03}", cardappearanceid );
-        "cardart/card_".to_string() + &cardappearancestring + ".jpg"
-        
-    }
     
     
 }
