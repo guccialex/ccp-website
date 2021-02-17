@@ -9,9 +9,6 @@ use std::collections::HashMap;
 use physicsengine::MainGame;
 
 use physicsengine::PieceAction;
-use physicsengine::BlackJackAction;
-use physicsengine::PokerAction;
-use physicsengine::CardAction;
 
 use physicsengine::VisibleGameObjectType;
 //use std::collections::HashSet;
@@ -96,19 +93,6 @@ impl LocalGameInterface{
     pub fn try_to_perform_action(&mut self, object1: ObjectType, object2: ObjectType) -> Option<String>{
         
         
-        //if object 1 and 2 are the same card, play that card
-        if let ObjectType::card(cardid1) = object1{
-            
-            if let ObjectType::card(cardid2) = object2{
-                
-                if cardid1 == cardid2{
-                    
-                    return  self.try_to_play_card(cardid1) ;
-                }
-            }
-        }
-        
-        
         
         let objecttoinput = self.get_inputs_of_object(object1);
         
@@ -133,55 +117,12 @@ impl LocalGameInterface{
         return self.try_to_perform_input(flickinput);
         
     }
-    pub fn try_to_play_card(&mut self, cardid: u16) -> Option<String>{
-        
-        let action = CardAction::playcardonboard;
-        let input = PlayerInput::cardaction(cardid, action);
-        
-        
-        return self.try_to_perform_input(input);
-        
-    }
     pub fn try_to_draw_card(&mut self) -> Option<String>{
         
         let input = PlayerInput::drawcard;
         
         return self.try_to_perform_input(input);
         
-    }
-    pub fn try_to_check(&mut self, pieces: &HashSet<u16>) -> Option<String>{
-        
-        let pieces: Vec<u16> = pieces.clone().into_iter().collect();
-        
-        let action = PokerAction::check(pieces);
-        let input = PlayerInput::pokeraction(action);
-        
-        
-        return self.try_to_perform_input(input);
-    }
-    pub fn try_to_raise(&mut self, pieces: &HashSet<u16>) -> Option<String>{
-        
-        let pieces: Vec<u16> = pieces.clone().into_iter().collect();
-        
-        let action = PokerAction::raise(pieces);
-        let input = PlayerInput::pokeraction(action);
-        
-        return self.try_to_perform_input(input);
-    }
-    pub fn try_to_fold(&mut self) -> Option<String>{
-        
-        let action = PokerAction::fold;
-        let input = PlayerInput::pokeraction(action);
-        
-        return self.try_to_perform_input(input);
-    }
-    pub fn try_to_settle_debt(&mut self, pieces: &HashSet<u16>) -> Option<String>{
-        
-        let pieces: Vec<u16> = pieces.clone().into_iter().collect();
-        
-        let input = PlayerInput::settledebt(pieces);
-        
-        return self.try_to_perform_input(input);
     }
     
     
@@ -322,19 +263,18 @@ impl LocalGameInterface{
     //if this object selectable by me
     pub fn is_object_selectable(&self, object: ObjectType) -> bool{
         
-        //assume I am not in value gathering mode
-        //assume i am 
+        if let ObjectType::piece(pieceid) = object{
+
+            let owner = self.thegame.get_board_game_object_owner(pieceid);
+
+            if owner == Some(self.playerid){
+
+                return true;
+            }
+
+        };
         
-        
-        //what makes an object selectable?
-        
-        /*
-        if its a piece owned by me
-        if its a 
-        
-        */
-        true
-        
+        return false;
     }
     
     
@@ -355,7 +295,6 @@ impl LocalGameInterface{
             panic!("didnt work");
         }
         
-        
     }
     
     
@@ -366,67 +305,8 @@ impl LocalGameInterface{
     
     
     
+
     
-    
-    
-    
-    /*
-    
-    //returns true if i am the owner of this object
-    //OR if its an object which im allowed to select, like raise, check, deck
-    //false otherwise
-    fn do_i_own_object(&self, object: ObjectType) -> bool{
-        
-        
-        if self.does_object_still_exist(object){
-            
-            if let ObjectType::card(cardid) = object{
-                
-                if let Some(ownerid)= self.thegame.get_card_owner(cardid){
-                    if ownerid  == self.playerid{
-                        return true;
-                    }
-                }
-            }
-            else if let ObjectType::piece(pieceid) = object{
-                
-                if self.playerid == self.thegame.get_board_game_object_owner(pieceid){
-                    return true;
-                }
-            }
-            else if let ObjectType::deck = object{
-                return true;
-            }
-            else if let ObjectType::foldbutton = object{
-                return true;
-            }
-            else if let ObjectType::raisebutton = object{
-                return true;
-            }
-            else if let ObjectType::checkbutton = object{
-                return true;
-            }
-            
-        }
-        
-        
-        
-        return false;
-    }
-    */
-    
-    
-    //if this piece can be proposed to be offered by this player
-    pub fn can_piece_be_offered(&self, pieceid: u16) -> bool{
-        
-        self.thegame.can_piece_be_offered(self.playerid, pieceid)
-    }
-    
-    //if theres a cardgame going on
-    pub fn is_cardgame_ongoing(&mut self) -> bool{
-        
-        self.thegame.is_pokergame_ongoing()
-    }
     
     //gets a map of every valid player input for this given object
     //mapped by the id of the object that needs to be clicked on for it to be performed
@@ -472,26 +352,6 @@ impl LocalGameInterface{
             }
             
         }
-        //if the object is a card
-        else if let ObjectType::card(cardid) = objectid{
-            
-            //get the pieces and squares actable by the card
-            let idtoinput = self.thegame.get_boardobject_actions_allowed_by_card(self.playerid, &cardid);
-            
-            
-            for (id, input) in idtoinput{
-                
-                if self.thegame.is_board_game_object_piece(id){
-                    toreturn.insert( ObjectType::piece(id), input );
-                }
-                else if self.thegame.is_board_game_object_square(id){
-                    toreturn.insert( ObjectType::boardsquare(id), input );
-                }
-                
-            }
-            
-            
-        }
         //if the object is a board square
         else if let ObjectType::boardsquare(id) = objectid{
             
@@ -528,14 +388,6 @@ impl LocalGameInterface{
         
         if let ObjectType::piece(pieceid) = object{
             if self.thegame.get_board_game_object_ids().contains(&pieceid){
-                return true;
-            }
-            else{
-                return false;
-            }
-        }
-        else if let ObjectType::card(cardid) = object{
-            if self.thegame.get_card_ids().contains(&cardid){
                 return true;
             }
             else{

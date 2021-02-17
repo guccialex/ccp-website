@@ -270,17 +270,18 @@ impl FullAppearanceState{
         
         
         let mut toadd = AppearanceData::default_object( objectname, position, rotation);
-
+        
         toadd.set_colour( colour );
         toadd.set_image( texturename );
-
         
         if typename == "poolball"{
             toadd.set_sphere(0.7);
+            //toadd.set_image("pieceart/poolball.png".to_string());
         }
         else{            
             toadd.set_cylinder( (0.5, 0.7) );
         }
+
         
         self.objects.push(toadd);
     }

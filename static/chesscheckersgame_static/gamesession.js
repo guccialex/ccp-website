@@ -32,10 +32,7 @@ if ( (urlParams.has("addressandport") === true) && (urlParams.has("gamepassword"
     
     run(addressandport, gamepassword);
 }
-else{
-    
-    
-    
+else{    
     
     run_serverless()
 }
@@ -227,7 +224,7 @@ async function rungame(thegame) {
 //doesnt this also manage getting input?
 class GameApperance{
     
-    constructor(engine, gameinterface){
+    constructor(engine, gameinterface, playerid){
         
         //create a scene for the engine
         let scene = new BABYLON.Scene(engine);
@@ -239,7 +236,12 @@ class GameApperance{
         let camera = new BABYLON.ArcRotateCamera("camera1", 0, 0, 0, new BABYLON.Vector3(0.0,2.0,0.0), scene);
         
         //set the position of the camera, not its target tho
-        camera.setPosition(new BABYLON.Vector3(0, 15, -7));
+        if (playerid == 1){
+            camera.setPosition(new BABYLON.Vector3(0, 15, -7));
+        }
+        else{
+            camera.setPosition(new BABYLON.Vector3(0, 15, 7));
+        }
         
         camera.lowerBetaLimit = 0.1;
         camera.upperBetaLimit = (Math.PI / 2) * 1.0;
@@ -342,11 +344,11 @@ class GameApperance{
         //for each object with shape data
         for (let objectdata of appearancedata.objects){
             
-            //console.log("shape updated");
-
             
             if (objectdata.shapetype != null) {
                 
+                console.log("shape updated");
+
                 //get the name of the object
                 let objectname = objectdata.name;
                 
@@ -399,7 +401,6 @@ class GameApperance{
         //for each object with texture data
         for (let objectdata of appearancedata.objects){
             
-            
             if (objectdata.texture != null) {
                 
                 //get the name of the object
@@ -449,7 +450,6 @@ class GameApperance{
                 
                 
             }
-            
             
         }
         
@@ -513,7 +513,7 @@ class GameApperance{
             //if it doesnt exist already yet
             if (this.wonbutton == null){
                 
-                var button1 = BABYLON.GUI.Button.CreateSimpleButton("wongui", "Congrats player " + appearancedata.winningplayer + " you won. We can all go home now");
+                var button1 = BABYLON.GUI.Button.CreateSimpleButton("wongui", "Congrats player " + appearancedata.winningplayer + " you won.");
                 button1.width = "550px"
                 button1.height = "200px";
                 button1.color = "white";
@@ -555,7 +555,7 @@ class GameInterface{
         
         
         //create the "appearance" object for this game, giving it the scene of the engine
-        this.gameappearance = new GameApperance(engine, this);
+        this.gameappearance = new GameApperance(engine, this, playerid);
         
         this.socket = socket;
         

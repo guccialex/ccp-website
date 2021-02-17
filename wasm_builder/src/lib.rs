@@ -203,74 +203,6 @@ impl FullGame{
     
     
     
-    fn click_in_value_gathering_mode(&mut self, objecttype: ObjectType){
-        
-        
-        //if its a piece select / deselect it
-        if let ObjectType::piece(pieceid) = objecttype{
-            
-            //if this piece is already offered, remove it from the pieces offered
-            if self.clientstate.piecesforoffer.contains(&pieceid){
-                self.clientstate.piecesforoffer.remove(&pieceid);
-            }
-            //if its not
-            else {
-                
-                //if it can be offered, add it to the pieces that can be offered
-                if self.localgame.can_piece_be_offered(pieceid){
-                    self.clientstate.piecesforoffer.insert(pieceid);
-                }
-            }
-        } 
-        //if its the debt owed button
-        else if ObjectType::debtbutton == objecttype{
-            
-            if let Some(input) = self.localgame.try_to_settle_debt( &self.clientstate.piecesforoffer){
-
-                self.queuedoutgoingsocketmessages.push(input);
-            
-                self.clientstate.piecesforoffer = HashSet::new();
-            }
-
-        }        
-        //if its the check button
-        else if ObjectType::checkbutton == objecttype{
-            
-            if let Some(input) = self.localgame.try_to_check( &self.clientstate.piecesforoffer){
-
-                self.queuedoutgoingsocketmessages.push(input);
-            
-                self.clientstate.piecesforoffer = HashSet::new();
-            }
-            
-        }
-        //if its the fold button
-        else if ObjectType::foldbutton == objecttype{
-            
-            if let Some(input) = self.localgame.try_to_fold(){
-
-                self.queuedoutgoingsocketmessages.push(input);
-            
-                self.clientstate.piecesforoffer = HashSet::new();
-
-            }
-        }
-        //if its the raise button
-        else if ObjectType::raisebutton == objecttype{
-            
-            if let Some(input) = self.localgame.try_to_raise( &self.clientstate.piecesforoffer){
-
-                self.queuedoutgoingsocketmessages.push(input);
-            
-                self.clientstate.piecesforoffer = HashSet::new();    
-            };
-
-        }
-        
-        
-    }
-    
-    
     
     //player input functions
     
@@ -286,15 +218,9 @@ impl FullGame{
             
             
             
-            //if there is a card game going on
-            if self.localgame.is_cardgame_ongoing(){
-                
-                //click the pieces in the value gathering mode
-                self.click_in_value_gathering_mode(pickedobject);
-            }
             
             //if theres an object already selected
-            else if let Some(currentlyselectedobject) = self.clientstate.selectedobject{
+            if let Some(currentlyselectedobject) = self.clientstate.selectedobject{
                 
                 if let Some(input) = self.localgame.try_to_perform_action(currentlyselectedobject, pickedobject){
                     
@@ -453,15 +379,10 @@ fn get_flick_force(relativedistancex: f32, relativedistancey: f32) -> Option<(f3
 #[derive(PartialEq, Copy, Clone, Hash, Eq, Debug)]
 pub enum ObjectType{
     
-    card(u16),
     boardsquare(u16),
     piece(u16),
     
     deck,
-    foldbutton,
-    raisebutton,
-    checkbutton,
-    debtbutton,
     
 }
 
@@ -482,26 +403,8 @@ impl ObjectType{
             let toreturn = "B".to_string() + &boardsquareid.to_string();
             return toreturn ;
         }
-        else if let ObjectType::card(cardid) = self{
-            
-            let toreturn = "C".to_string() + &cardid.to_string();
-            return toreturn ;
-        }
         else if let ObjectType::deck = self{
             return "deck".to_string();
-        }
-        else if let ObjectType::raisebutton = self{
-            return "raise button".to_string();
-        }
-        else if let ObjectType::foldbutton = self{
-            return "fold button".to_string();
-        }
-        else if let ObjectType::checkbutton = self{
-            return "check button".to_string();
-        }
-        else if let ObjectType::debtbutton = self{
-            
-            return "debt button".to_string();
         }
         else{
             panic!("cant convert object type to a string");
@@ -515,20 +418,6 @@ impl ObjectType{
         if objectname == "deck"{
             return Some( ObjectType::deck  );
         }
-        else if objectname == "raise button"{
-            return Some( ObjectType::raisebutton );
-        }
-        else if objectname == "fold button"{
-            return Some( ObjectType::foldbutton );
-        }
-        else if objectname == "check button"{
-            
-            return Some( ObjectType::checkbutton );
-        }
-        else if objectname == "debt button"{
-            
-            return Some( ObjectType::debtbutton );
-        }
         //if the first character of the objects name is "P"
         else if objectname.chars().nth(0).unwrap() == 'P'{
             
@@ -536,17 +425,6 @@ impl ObjectType{
             let stringpieceid = objectname[1..].to_string();
             let intpieceid = stringpieceid.parse::<u16>().unwrap();
             let toreturn = ObjectType::piece(intpieceid);
-            
-            return Some (toreturn);
-            
-        }
-        //if the first character of the objects name is "C"
-        else if objectname.chars().nth(0).unwrap() == 'C'{
-            
-            //get the rest of the name and try to convert it to an int
-            let stringcardid = objectname[1..].to_string();
-            let intcardid = stringcardid.parse::<u16>().unwrap();
-            let toreturn = ObjectType::card(intcardid);
             
             return Some (toreturn);
             
