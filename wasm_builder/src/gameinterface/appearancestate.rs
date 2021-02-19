@@ -12,35 +12,55 @@
 
 use serde::{Serialize, Deserialize};
 
+use std::collections::HashMap;
+
+use physicsengine::GameEffect;
+
+use physicsengine::CardEffect;
 
 
 //a struct representing the entire state of a games physical appearance
 #[derive(Serialize, Deserialize, Clone)]
 pub struct FullAppearanceState{
-
+    
     //the position of the camera
     
     //the visible objects
     pub objects: Vec<AppearanceData>,
-
-
+    
+    
     //if either player won
     winningplayer: Option<u8>,
-
-
-    //guioverlay
-
-    //size, message, image,
+    
+    
+    //the overlay
+    overlay: Option<Overlay>,
+    
     
 }
+
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
+struct Overlay{
+
+    image: String,
+
+    scale: f32,
+
+    position: (f32,f32),
+
+}
+
+
 
 impl FullAppearanceState{
     
     pub fn new() -> FullAppearanceState{
         FullAppearanceState{
             objects: Vec::new(),
-
+            
             winningplayer: None,
+
+            overlay: None,
         }   
     }
     
@@ -57,135 +77,135 @@ impl FullAppearanceState{
     
 }
 
-use std::collections::HashMap;
+
 
 
 
 //the public methods to this
 impl FullAppearanceState{
-
-
+    
+    
     
     pub fn set_gameobject_colour(&mut self, gameobjectname: String, colour: (u8,u8,u8)){
-
-
+        
+        
         //highlight every object in the list of objects that has the name specified
         for object in self.objects.iter_mut(){
-
+            
             if gameobjectname == object.name{
-
+                
                 object.set_colour( colour);
             }
         }
     }
-
-
+    
+    
     //what colour to tint the object and by what amount (1.0 = 100%, 0.0 = 0%)
     pub fn tint_object_colour(&mut self, objectname: String, colour: (u8, u8, u8), mut tintamount: f32){
         
-
+        
         for curobject in self.objects.iter_mut(){
             
             if curobject.name == objectname{
-
+                
                 curobject.tint_colour(colour, tintamount);
                 
             }
         }
-
+        
     }
-
-
-
-
+    
+    
+    
+    
     pub fn new_cue(&mut self, pos: (f32,f32,f32), rot: (f32,f32,f32)){
         
         let mut toadd = AppearanceData::default_object("dragindicator".to_string(), pos, rot);
-
+        
         toadd.set_colour( (100,100,100) );
-
+        
         toadd.set_cube( (0.2, 0.2, 1.2) );
         
         self.objects.push(toadd);
     }
-
+    
     //remove the shape and texture from an object thats been created
     pub fn remove_shape(&mut self, objectname: String){
-
+        
         for curobject in self.objects.iter_mut(){
             
             if curobject.name == objectname{
-
+                
                 curobject.shapetype = None;
             }
         }
     }
-
+    
     pub fn remove_texture(&mut self, objectname: String){
-
+        
         for curobject in self.objects.iter_mut(){
             
             if curobject.name == objectname{
-
+                
                 curobject.texture = None;
             }
         }
-
+        
     }
-
-
-
+    
+    
+    
     pub fn remove_unchanged_shapes_and_textures(&mut self, prevappearances: & HashMap<String, AppearanceData>) -> HashMap<String, AppearanceData>{
-
-
+        
+        
         let mut curappearances = HashMap::new();
-
+        
         for appearancestate in & self.objects{
-
+            
             curappearances.insert( appearancestate.name.clone(), appearancestate.clone() );
         };
-
-
+        
+        
         let curappearances = curappearances;
-
-
-
+        
+        
+        
         for (curname, curappearance) in & curappearances{
-
+            
             if let Some(prevappearance) = prevappearances.get( curname){
-
-
+                
+                
                 if prevappearance.shapetype == curappearance.shapetype{
                     self.remove_shape( curname.clone() );
                 }
-
+                
                 if prevappearance.texture == curappearance.texture{
-
+                    
                     self.remove_texture( curname.clone() );
                 }
-
+                
             }
         }
-
         
-
+        
+        
         curappearances
         
     }
     
     pub fn new_deck(&mut self, candraw: bool){
-
+        
         let mut toadd = AppearanceData::default_object("deck".to_string(), (-7.0,0.0,0.0), (0.0,0.0,0.0));
-
+        
         if candraw{
-
+            
             toadd.set_colour( (200,200,200) );            
         }
         else{
-
+            
             toadd.set_colour( (0,0,0) );
         }
-
+        
         toadd.set_cube( (0.6, 1.96, 1.4) );
         //toadd.set_image( "cardart/cardback.jpg".to_string() );
         
@@ -194,8 +214,8 @@ impl FullAppearanceState{
     }
     
     pub fn new_timer(&mut self, playerid: u32, ticksleft: u32, currentlyturn: bool) {
-
-
+        
+        
         //the time left should be as minutes then seconds
         let seconds = ticksleft / 30;
         
@@ -228,17 +248,17 @@ impl FullAppearanceState{
         else{
             colour = (255,255,255);
         }
-
-
-
-
-
-
+        
+        
+        
+        
+        
+        
         let mut toadd = AppearanceData::default_object(name , position, (0.0,0.0,0.0));
-
+        
         toadd.set_colour( colour );
         toadd.set_cube( (0.01, 2.0, 2.0) );
-        toadd.set_text( timeleft, (0.0,30.0), 30);
+        toadd.add_text( timeleft, (0.0,30.0), 30);
         
         
         self.objects.push(toadd);
@@ -263,7 +283,7 @@ impl FullAppearanceState{
             texturename = "pieceart/b_".to_string() + &typename + &".png";
         }
         else{
-
+            
             colour = (255,5,255);
             texturename = "pieceart/".to_string() + &typename + &".png";
         }
@@ -281,35 +301,137 @@ impl FullAppearanceState{
         else{            
             toadd.set_cylinder( (0.5, 0.7) );
         }
-
+        
         
         self.objects.push(toadd);
     }
+    
+    
+    
+    pub fn new_game_effect(&mut self, gameeffect: &GameEffect, number: &u32 ){
+        
+        
+        let xnumb = number % 3;
+        let znumb = number / 3;
+        
+        //the position 
+        let xpos = xnumb as f32 * 2.75 + 7.5;
+        let ypos = 0.0 ;//+ *number as f32;
+        let zpos = 4.0 - znumb as f32 * 4.0 ;//+ *number as f32;
+
+
+        let mut name = "default".to_string();
+
+
+        if let GameEffect::DoubleTurns = gameeffect{
+            name = "double_turns_card".to_string();
+        }
+        else if let GameEffect::KingsReplaced = gameeffect{
+            name = "kings_replaced".to_string();
+        }
+        else if let GameEffect::PawnsNotPromoted = gameeffect{
+            name = "pawns_arent_promoted".to_string();
+        }
+        else if let GameEffect::PoolGame = gameeffect{
+            name = "pool_game".to_string();
+        }
+        else if let GameEffect::TurnsTimed(ticks) = gameeffect{
+            name = "turns timed".to_string();
+        }
+        
+        
+        
+        
+        let mut toadd =  AppearanceData::default_object( name , (xpos, ypos, zpos) , (0.0, 3.14/2.0 ,0.0) );
+
+
+        
+        toadd.set_cube( (0.1, 3.5, 2.25) );
+
+
+
+        
+
+        if let GameEffect::DoubleTurns = gameeffect{
+
+            toadd.set_image("effectcards/backtoback_e.png".to_string());
+        }
+        else if let GameEffect::KingsReplaced = gameeffect{
+   
+            toadd.set_image("effectcards/kingsreplaced_c.png".to_string());
+        }
+        else if let GameEffect::PawnsNotPromoted = gameeffect{
+
+            toadd.set_image("effectcards/pawnsnotpromoted_c.png".to_string());
+        }
+        else if let GameEffect::PoolGame = gameeffect{
+
+            toadd.set_image("effectcards/poolgame_e.png".to_string() );
+        }
+        else if let GameEffect::TurnsTimed(ticks) = gameeffect{
+
+            let seconds = ticks / 60;
+            let text = format!("Turns Are");
+            let text2 = format!("{:?} seconds", seconds);
+               
+            toadd.add_text( text, (0.0,35.0) , 35 );
+            toadd.add_text( text2, (0.0,70.0) , 35 );
+
+        }
+
+
+        
+
+
+
+
+        //its 1 unit = 1.5 inches
+        //because a board square is 1.5 inches
+        //and a playing card is 2.25" * 3.5"
+        
+        //the coordinates apparently map to 
+        //0 -> y
+        //1 -> x
+        //2 -> z
+        
+        
+        self.objects.push(toadd);
+        
+    }
+
+
+
+
+    pub fn new_card_effect_display(&mut self, cardeffect: & CardEffect){
+
+        
+
+        if let CardEffect::makepoolgame = cardeffect{
+
+            self.set_overlay("effectcards/poolgame_e.png".to_string(), 0.15, (0.0, 0.0) );
+        }
+        else if let CardEffect::backtobackturns = cardeffect{
+
+            self.set_overlay("effectcards/backtoback_e.png".to_string(), 0.15, (0.0, 0.0) );
+        }
+        else if let CardEffect::halvetimeleft = cardeffect{
+
+            self.set_overlay("effectcards/halvetimeleft_e.png".to_string(), 0.15, (0.0, 0.0) );
+        }
+
+
+
+    }
+    
 
 
 
     
-    pub fn new_card(&mut self, objectname: String, position: (f32,f32,f32), mut rotation: (f32,f32,f32), cardtexture: String ) {
-        
-        //let texturename = LocalGameInterface::get_name_of_cards_texture(&card);
-        
-        rotation.1 += 3.14159 / 2.0;
-        
-        let mut toadd = AppearanceData::default_object( objectname, position, rotation );
-
-        toadd.set_colour( (200,200,200) );
-        toadd.set_cube( (0.1, 1.96, 1.4) );
-        toadd.set_image( cardtexture );
-        
-        
-        self.objects.push(toadd);
-
-    }
     
     pub fn new_boardsquare(&mut self, objectname: String, position: (f32,f32,f32), rotation: (f32,f32,f32), white: bool ){
-            
+        
         let mut toadd = AppearanceData::default_object( objectname, position, rotation );
-
+        
         toadd.set_cube( (1.0, 1.0, 1.0) );
         
         
@@ -320,150 +442,31 @@ impl FullAppearanceState{
             toadd.set_colour( (0,0,0) );
         }
         
-
+        
         self.objects.push(toadd);
-
-    }
-
-    
-    pub fn new_check_button(&mut self){
-
-        let mut toadd = AppearanceData::default_object("check button".to_string(), (5.5,0.0,-6.0), (0.0,0.0,0.0));
-
-
-        toadd.set_colour( (200,200,200) );
-
-
-        let text = format!("check");
-
-        toadd.set_text(text, (10.0,40.0), 20);
-
-        toadd.set_cylinder( (0.1, 1.5) );
-        
-        
-        self.objects.push( toadd );
-    }
-    
-    pub fn new_fold_button(&mut self){
-
-        let mut toadd = AppearanceData::default_object("fold button".to_string(), (7.5,0.0,-6.0), (0.0,0.0,0.0));
-
-
-        toadd.set_colour( (200,200,200) );
-
-
-        let text = format!("fold");
-
-        toadd.set_text(text, (10.0,40.0), 20);
-
-        toadd.set_cylinder( (0.1, 1.5) );
-        
-        
-        self.objects.push( toadd );
-
-    }
-    
-    pub fn new_raise_button(&mut self) {
-
-        let mut toadd = AppearanceData::default_object("raise button".to_string(), (9.5,0.0,-6.0), (0.0,0.0,0.0));
-
-        toadd.set_colour( (200,200,200) );
-
-
-        let text = format!("raise");
-
-        toadd.set_text(text, (10.0,40.0), 20);
-
-        toadd.set_cylinder( (0.1, 1.5) );
-        
-        
-        self.objects.push( toadd );
-    }
-    
-    pub fn new_piece_value_offered(&mut self, valuex: u8) {
-
-
-        let mut toadd = AppearanceData::default_object("piece value".to_string(), (-9.0,0.0,0.0), (0.0,0.0,0.0));
-
-        toadd.set_colour( (200,200,200) );
-
-
-        let text = format!("{} selected", valuex);
-
-        toadd.set_text(text, (10.0,40.0), 20);
-
-        toadd.set_cylinder( (0.01, 2.0) );
-        
-        
-        self.objects.push( toadd );
-
         
     }
     
-    pub fn new_debt_owed_button(&mut self, debt: u8) {
-        
+    
+    
 
-        let mut toadd = AppearanceData::default_object("debt button".to_string(), (-6.0,1.0,0.0), (0.0,0.0,0.0));
+    fn set_overlay(&mut self, image: String, scale: f32, position: (f32,f32)){
 
-        toadd.set_colour( (200,200,200) );
+        self.overlay = Some(Overlay{
 
-        let text = format!("PAY ANTE OF {}", debt);
+            image: image,
+            
+            scale: scale,
 
-        toadd.set_text(text, (10.0,40.0), 10);
-
-        toadd.set_cube( (0.01, 3.0, 3.0) );
-        
-        
-        self.objects.push( toadd );
+            position: position,
+        });
         
     }
     
-    pub fn new_cost_to_check(&mut self, costtocheck: u8) {
-        
-
-        let mut toadd = AppearanceData::default_object( "cost to check".to_string(), (12.0, 0.0, -6.0), (0.0,0.0,0.0));
-
-        toadd.set_colour( (200,200,200) );
-
-        let text = format!("check {}", costtocheck);
-        toadd.set_text(text, (10.0,40.0), 20);
-
-        toadd.set_cube( (0.01, 2.0, 2.0) );
-        
-        
-        self.objects.push( toadd );        
-        
-    }
-
-
-
-    //display a gui message
-    pub fn new_gui_message(&mut self, message: String){
-
-        //effect: start a game of pool
-
-        /*
-
-        You need to settle the ante of 1 to continue
-
-        If you dont...
-
-        Well
-
-        Your opponent gets some piece
-
-
-
-        (i still dont know what the "if you dont" is)
-
-        */
-
-
-
-    }
-
-
-
+    
+    
+    
+    
 }
 
 
@@ -480,92 +483,95 @@ pub struct AppearanceData{
     
     position: (f32,f32,f32),
     rotation: (f32,f32,f32),
-
-
-
+    
+    
+    
     //the shape
     shapetype: Option<ShapeType>,
     
     //the texture
     texture: Option<Texture>,
+
+
 }
 
 
 //private appearance data functions
 impl AppearanceData{
-
-
+    
+    
     fn default_object(objectname: String, position: (f32,f32,f32), rotation: (f32,f32,f32)) -> AppearanceData{
-
+        
         let shape = CubeShape(1.0,1.0,1.0);
-
+        
         let texture = Texture{
             colour: (100,100,100),
             image: None,
-            text: None,
+            texts: Vec::new(),
         };
-
-
+        
+        
         AppearanceData{
             name: objectname,
             position: position,
             rotation: rotation,
-
+            
             shapetype: None,//ShapeType::Cube(shape),
-
+            
             texture: None,//texture,
+
         }
     }
-
-
-
+    
+    
+    
     fn set_sphere(&mut self, diameter: f32){
-
+        
         let shape = CircleShape(diameter);
-
+        
         self.shapetype = Some(ShapeType::Circle(shape));
     }
-
+    
     fn set_cylinder(&mut self, dimensions: (f32,f32) ){
-
+        
         let shape = CylinderShape(dimensions.0, dimensions.1);
-
+        
         self.shapetype = Some(ShapeType::Cylinder(shape));
     }
-
+    
     fn set_cube(&mut self, dimensions: (f32,f32,f32)){
-
+        
         let shape = CubeShape(dimensions.0, dimensions.1, dimensions. 2);
-
+        
         self.shapetype = Some(ShapeType::Cube(shape));
     }
-
-
-
+    
+    
+    
     fn set_colour(&mut self, colour: (u8,u8,u8)){
-
+        
         //if texture doesnt exist create it
         if self.texture.is_none(){
             self.texture = Some(Texture::default_texture());
         };
-
+        
         if let Some(texture) = &mut self.texture{
             texture.colour = colour;
         };
-
+        
     }
-
-
+    
+    
     fn tint_colour(&mut self, colour: (u8, u8, u8), mut tintamount: f32){
-
+        
         //if texture doesnt exist create it
         if self.texture.is_none(){
             self.texture = Some(Texture::default_texture());
         };
-
-
+        
+        
         let tintingcolourfloat = (colour.0 as f32, colour.1 as f32, colour.2 as f32);
-
+        
         //make the tint amount in the appropriate range
         if tintamount > 1.0{
             tintamount = 1.0
@@ -573,10 +579,10 @@ impl AppearanceData{
         if tintamount < 0.0{
             tintamount = 0.0;
         }
-
+        
         let tintinverse = 1.0 - tintamount;
         
-
+        
         let colourfloat = (self.texture.as_ref().unwrap().colour.0 as f32,
         self.texture.as_ref().unwrap().colour.1 as f32,
         self.texture.as_ref().unwrap().colour.2 as f32);
@@ -585,53 +591,70 @@ impl AppearanceData{
         let mixedg = tintingcolourfloat.1 * tintamount + colourfloat.1 * tintinverse;
         let mixedb = tintingcolourfloat.2 * tintamount + colourfloat.2 * tintinverse;
         
-
-
+        
+        
         if let Some(texture) = &mut self.texture{
             texture.colour = (mixedr as u8, mixedg as u8, mixedb as u8);
         };
-
+        
     }
+    
+    fn add_text(&mut self, text: String, position: (f32,f32), fontsize: u32){
+        //this overrides any texture set for whatever reason
 
-    fn set_text(&mut self, text: String, position: (f32,f32), fontsize: u32){
+        //toadd.add_text( "Pawns Arent".to_string(), (0.0,35.0) , 30 );
+        //toadd.add_text( "Promoted".to_string(), (0.0,70.0) , 35 );
 
+
+        
         //if texture doesnt exist create it
         if self.texture.is_none(){
             self.texture = Some(Texture::default_texture());
         };
+        
 
+        let mut xsize = 100.0;
+        let mut ysize = 100.0;
 
+        //get the dimensions to get the size
+        if let Some( ShapeType::Cube( CubeShape(x,y,z) ) ) = &self.shapetype{
+            xsize = z * 50.0;
+            ysize = y * 50.0;
+        }
+
+        
         if let Some(texture) = &mut self.texture{
-            texture.text = Some(Text{
+            texture.texts.push(Text{
                 text: text,
                 position: position,
                 fontsize: fontsize,
+
+                xsize: xsize,
+                ysize: ysize,
+
             });
         };
-
+        
     }
-
+    
     fn set_image(&mut self, image: String){
-
+        
         //if texture doesnt exist create it
         if self.texture.is_none(){
             self.texture = Some(Texture::default_texture());
         };
-
-
+        
+        
         if let Some(texture) = &mut self.texture{
             
             texture.image = Some(image);
         };
-       
+        
     }
 
 
-
+    
 }
-
-
-
 
 
 
@@ -678,24 +701,24 @@ struct Texture{
     
     image: Option<String>,
     
-    text: Option<Text>,
+    texts: Vec<Text>,
 }
 
 
 impl  Texture{
-
+    
     fn default_texture() -> Texture{
-
+        
         Texture{
             colour: (200,200,200),
             image: None,
-            text: None,
+            texts: Vec::new(),
         }
-
-
+        
+        
     }
-
-
+    
+    
 }
 
 
@@ -706,4 +729,8 @@ struct Text{
     position: (f32,f32),
     
     fontsize: u32,
+
+
+    xsize: f32,
+    ysize: f32,
 }

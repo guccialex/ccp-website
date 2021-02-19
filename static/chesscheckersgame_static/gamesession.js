@@ -311,13 +311,22 @@ class GameApperance{
         
         //this.scene.freezeActiveMeshes();
         
+        
+        
+        this.removedoverlay = false;
+        
+        
+        
         /*
-        var image = new BABYLON.GUI.Image("overlay", "testimage.png");
-        image.width = "20%";
-        image.height = "20%";
-        image.left = "-40%";
-        image.top = "-40%";
-        this.advancedTexture.addControl(image);
+        let eemg = new BABYLON.GUI.Image("thing", "effectcards/test.png");
+        eemg.width = 0.2;
+        eemg.height = 0.2;
+        
+        
+        eemg.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+        eemg.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+        
+        this.advancedTexture.addControl(eemg);
         */
         
         
@@ -337,18 +346,91 @@ class GameApperance{
     //render the scene using the appearance data
     render(appearancedata){
         
-        //the list of objects passed in to be rendered
-        let objectspassedtorender = [];
+        
+        
+        //if there is an image overlay passed in
+        if (appearancedata.overlay != null){
+            
+            
+            //get the name of the previous image
+            let oldimagename = null;
+            
+            if (this.imageoverlay != null){
+                oldimagename = this.imageoverlay.name;
+            }
+            
+            
+            //if the image overlay has a different name than the new one
+            if (appearancedata.overlay.image != oldimagename){
+                
+                //console.log("DRa W A DCARD");
+                //console.log("the card " + appearancedata.overlay.image);
+                
+                
+                //remove it
+                if (this.imageoverlay != null){
+
+                    this.imageoverlay.dispose();
+                    this.imageoverlay = null;
+                }
+                
+                
+                let image = appearancedata.overlay.image;
+                let scale = appearancedata.overlay.scale;
+                //unused
+                //let pos = appearancedata.overlay.position;
+                
+                
+                
+                this.imageoverlay = new BABYLON.GUI.Image(image, image);
+
+                this.imageoverlay.width = scale;
+                //this.imageoverlay.height = scale/2;
+
+                this.imageoverlay.stretch = BABYLON.GUI.Image.STRETCH_UNIFORM;
+
+
+                //this.imageoverlay.left = "-40%";
+                this.imageoverlay.top = -scale/2;
+                
+                this.imageoverlay.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+                this.imageoverlay.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+                
+                this.advancedTexture.addControl(this.imageoverlay);
+
+                console.log("made new overlay");
+                
+            }
+            
+        }
+
+        else{
+            
+            //remove it
+            if (this.imageoverlay != null){
+                
+                console.log("REMOVING OVERLAY");
+                this.imageoverlay.dispose();    
+                this.imageoverlay = null;   
+            }            
+        }
+        
+        
+        
         
         
         //for each object with shape data
         for (let objectdata of appearancedata.objects){
             
             
+            
+            
+            
+            
             if (objectdata.shapetype != null) {
                 
-                console.log("shape updated");
-
+                
+                
                 //get the name of the object
                 let objectname = objectdata.name;
                 
@@ -356,47 +438,102 @@ class GameApperance{
                 let objectmesh = this.scene.getMeshByName(objectname);
                 
                 
+                //if a mesh already exists for this shape delete it
+                if (objectmesh != null){
+                    
+                    objectmesh.dispose();
+                    
+                }
+                
+                
+                
                 let shapetype = objectdata.shapetype;
                 
                 if (shapetype.Cube != undefined){
                     
-                    let shapedata = shapetype.Cube;    
+                    let shapedata = shapetype.Cube;
+                    
+                    var faceUV = new Array(6);
+                    
+                    //set all values to zero
+                    for (var i = 0; i < 6; i++) {
+                        faceUV[i] = new BABYLON.Vector4(0, 0, 0, 0);
+                    }
+                    
+                    faceUV[4] = new BABYLON.Vector4(0, 0, 1, 1);
+                    
                     
                     let options = {
                         height : shapedata[0],
                         width  : shapedata[1],
                         depth  : shapedata[2],
+                        
+                        faceUV: faceUV,
                     };
                     
-                    objectmesh = BABYLON.MeshBuilder.CreateBox(objectname, options, this.scene);
+                    BABYLON.MeshBuilder.CreateBox(objectname, options, this.scene);
                 }
                 else if (shapetype.Cylinder != undefined){
                     
                     let shapedata = shapetype.Cylinder;
                     
+                    
+                    var faceUV = new Array(6);
+                    
+                    //set all values to zero
+                    for (var i = 0; i < 3; i++) {
+                        faceUV[i] = new BABYLON.Vector4(0, 0, 0, 0);
+                    }
+                    
+                    faceUV[2] = new BABYLON.Vector4(1, 0, 0, 1);
+                    
+                    
                     let options = {
                         height : shapedata[0],
                         diameter  : shapedata[1],
+                        faceUV : faceUV,
                     };
                     
-                    objectmesh = BABYLON.MeshBuilder.CreateCylinder(objectname, options, this.scene);
+                    BABYLON.MeshBuilder.CreateCylinder(objectname, options, this.scene);
                 }
                 else if (shapetype.Circle != undefined){
                     
                     let shapedata = shapetype.Circle;
                     
                     let options = {
-                        diameter: shapedata[0]
+                        diameter : shapedata,
                     };
                     
-                    objectmesh = BABYLON.MeshBuilder.CreateSphere(objectname, options, this.scene);
+                    BABYLON.MeshBuilder.CreateSphere(objectname, options, this.scene);
                 }
                 
             }
+            
+            
+            //if that object doesnt exist still, there needs to be one made
+            //so that it doesnt create an error
+            
+            if ( this.scene.getMeshByName(objectdata.name) == null ){
+                
+                console.log("needed a shapetype to make object but didnt find one");
+                console.log(objectdata);
+                
+                
+                let options = {
+                    height : 1,
+                    width  : 1,
+                    depth  : 1,
+                };
+                
+                BABYLON.MeshBuilder.CreateBox(objectdata.name, this.scene);
+                
+            }
+            
+            
         }
         
-
-
+        
+        
         
         //for each object with texture data
         for (let objectdata of appearancedata.objects){
@@ -409,44 +546,56 @@ class GameApperance{
                 //the old mesh that might or might not exists
                 let objectmesh = this.scene.getMeshByName(objectname);
                 
-
-
+                
+                
                 objectmesh.material = new BABYLON.StandardMaterial("bs_mat", this.scene);
                 
                 let colour = new BABYLON.Color3( objectdata.texture.colour[0] / 255, objectdata.texture.colour[1] / 255, objectdata.texture.colour[2] /255);
                 objectmesh.material.diffuseColor = colour;
                 
-
-
+                
+                
                 //if this object has an image for its texture
                 if (objectdata.texture.image != null){
-                
+                    
                     //if the object doesnt have a texture set yet
                     objectmesh.material.ambientTexture = new BABYLON.Texture(objectdata.texture.image, this.scene);
+                    
                 }
-
-
-
-            
-            
+                
+                
+                
+                
+                
                 //if this object has text
-                let textdata = objectdata.texture.text;
-                if (textdata != null){
+                let textdatas = objectdata.texture.texts;
                 
-                    let texture = new BABYLON.DynamicTexture("dynamic texture", {width:100, height:100}, this.scene);   
+                if (textdatas.length != 0){
+                    
+                    
+                    
+                    let texture = new BABYLON.DynamicTexture("dynamic texture", {width:textdatas[0].xsize, height:textdatas[0].ysize}, this.scene);   
                     objectmesh.material.diffuseTexture = texture;
-                
-                    let text = textdata.text;
-                    let font = "bold "+textdata.fontsize+"px monospace";
-                    let xpos = textdata.position[0];
-                    let ypos = textdata.position[1];
-                
-                    objectmesh.material.diffuseTexture.drawText(text, xpos, ypos, font, "white", "transparent", true, true);
-                
                     objectmesh.material.useAlphaFromDiffuseTexture = true;
-                
+                    
+                    
+                    
+                    
+                    for (let textdata of textdatas){
+                        
+                        let text = textdata.text;
+                        let font = "bold "+textdata.fontsize+"px monospace";
+                        let xpos = textdata.position[0];
+                        let ypos = textdata.position[1];
+                        
+                        objectmesh.material.diffuseTexture.drawText(text, xpos, ypos, font, "white", "transparent", true, true);   
+                    }
+                    
                 }
-            
+                
+                
+                
+                
                 
                 
             }
@@ -462,8 +611,11 @@ class GameApperance{
             //get the name of the object
             let objectname = objectdata.name;
             
+            
             //the old mesh that might or might not exists
             let objectmesh = this.scene.getMeshByName(objectname);
+            
+            
             
             //if this mesh was just created, or the shape needs to updated
             objectmesh.position.x = (objectmesh.position.x * 0.5) + (objectdata.position[0] * 0.5);
@@ -477,11 +629,15 @@ class GameApperance{
         }
         
         
-
+        
+        //the layer
+        
+        
+        
         let objectstokeep = new Map();
         
         for (let objectdata of appearancedata.objects){
-
+            
             objectstokeep.set(objectdata.name);
         }
         

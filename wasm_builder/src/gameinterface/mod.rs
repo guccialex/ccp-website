@@ -13,6 +13,8 @@ use physicsengine::PieceAction;
 use physicsengine::VisibleGameObjectType;
 //use std::collections::HashSet;
 
+use physicsengine::GameEffect;
+
 
 
 mod appearancestate;
@@ -246,11 +248,38 @@ impl LocalGameInterface{
                 toreturn.set_gameobject_colour(highlightedobjectname, (0,255,0));
             }
         }
+
+
+
+        let mut effectnumb = 0;
+
+        //get the effects on the board
+        for effect in &ccpgamestate.gameeffects{
+
+            toreturn.new_game_effect(effect, &effectnumb);
+
+            effectnumb += 1;
+
+        };
+
+
+        //display the last card effect played 10 seconds ago
+        //for cardeffect in &ccpgamestate.eff
+
+        if let Some( (effect, ticksago) ) = &ccpgamestate.lastcardeffect{
+
+            if ticksago < &60{
+
+                toreturn.new_card_effect_display(effect);
+
+            }
+
+        }
+
         
         
         
         self.prevappearance = toreturn.remove_unchanged_shapes_and_textures( &self.prevappearance );
-        
         toreturn
         
     }

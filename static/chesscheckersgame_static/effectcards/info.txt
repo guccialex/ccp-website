@@ -1,0 +1,9 @@
+the cards effects to display as cards
+
+the game effects to display as cards
+
+
+effectcards/poolgame_e.png
+effectcards/backtoback_e.png
+effectcards/dropsquare_e.png
+effectcards/halvetimeleft_e.png
