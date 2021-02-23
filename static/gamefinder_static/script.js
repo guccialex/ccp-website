@@ -12,18 +12,17 @@ let baseurl = window.location.origin;
 let listrequest = new XMLHttpRequest();
 listrequest.open("GET", baseurl+ "/get_available_games", true); // true for asynchronous 
 
-listrequest.onload() = () => {
 
-    console.log( listrequest.response );
+listrequest.onreadystatechange = function(){
 
-    var gamelist = JSON.parse( listrequest.response );
+    console.log( this.responseText );
+
+    var gamelist = JSON.parse( this.responseText );
 
     for (gameinfo of gamelist) {
     
-        let btn = document.createElement( "BUTTON");
-
+        let btn = document.createElement("BUTTON");
         btn.innerHTML = JSON.stringify( gameinfo );
-        
         document.body.appendChild(btn);
     }
 
