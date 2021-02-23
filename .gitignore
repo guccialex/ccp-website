@@ -2,6 +2,7 @@
 /target/
 /wasm_builder/pkg/
 /wasm_builder/target/
+/wasm_builder/cargo.lock/
 /static/chesscheckersgame_static/wasmfiles/
 /static/chesscheckersgame_static/.cache/
 /static/chesscheckersgame_static/dist/
