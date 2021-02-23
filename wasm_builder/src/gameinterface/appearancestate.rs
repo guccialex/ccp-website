@@ -335,10 +335,12 @@ impl FullAppearanceState{
         else if let GameEffect::PoolGame = gameeffect{
             name = "pool_game".to_string();
         }
-        else if let GameEffect::TurnsTimed(ticks) = gameeffect{
+        else if let GameEffect::TurnsTimed(_) = gameeffect{
             name = "turns timed".to_string();
         }
-        
+        else if let GameEffect::RaisedSquares(_) = gameeffect{
+            name = "turns timed".to_string();
+        }
         
         
         
@@ -367,6 +369,24 @@ impl FullAppearanceState{
         else if let GameEffect::PoolGame = gameeffect{
 
             toadd.set_image("effectcards/poolgame_e.png".to_string() );
+        }
+        else if let GameEffect::RaisedSquares(number) = gameeffect{
+
+            let firstline = format!("{:?}", number);
+
+            toadd.add_text(firstline, (0.0,70.0), 60);
+            toadd.add_text("raised".to_string(), (0.0,100.0), 25);
+            toadd.add_text("squares".to_string(), (0.0,130.0), 25);
+
+        }
+        else if let GameEffect::RemovedSquares(number) = gameeffect{
+
+            let firstline = format!("{:?}", number);
+
+            toadd.add_text(firstline, (0.0,70.0), 60);
+            toadd.add_text("removed".to_string(), (0.0,100.0), 25);
+            toadd.add_text("squares".to_string(), (0.0,130.0), 25);
+
         }
         else if let GameEffect::TurnsTimed(ticks) = gameeffect{
 
@@ -418,6 +438,15 @@ impl FullAppearanceState{
 
             self.set_overlay("effectcards/halvetimeleft_e.png".to_string(), 0.15, (0.0, 0.0) );
         }
+        else if let CardEffect::raisesomesquares(_) = cardeffect{
+
+            self.set_overlay("effectcards/raisesquares_e.png".to_string(), 0.15, (0.0, 0.0) );
+        }
+        else if let CardEffect::removesomesquares(_) = cardeffect{
+
+            self.set_overlay("effectcards/dropsquares_e.png".to_string(), 0.15, (0.0, 0.0) );
+        }
+        
 
 
 

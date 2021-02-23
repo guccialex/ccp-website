@@ -193,12 +193,20 @@ impl LocalGameInterface{
             
             if let physicsengine::VisibleGameObjectType::Piece(pieceobject) = &boardgameobject.objecttype{
                 
-                toreturn.new_piece( gameobjectname, pieceobject.typename.clone(), boardgameobject.position, boardgameobject.rotation, pieceobject.owner );
+                toreturn.new_piece( gameobjectname.clone(), pieceobject.typename.clone(), boardgameobject.position, boardgameobject.rotation, pieceobject.owner );
             }
             else if let physicsengine::VisibleGameObjectType::Square(squareobject) = &boardgameobject.objecttype{
                 
-                toreturn.new_boardsquare( gameobjectname, boardgameobject.position, boardgameobject.rotation, squareobject.iswhite );
+                toreturn.new_boardsquare( gameobjectname.clone(), boardgameobject.position, boardgameobject.rotation, squareobject.iswhite );
             };
+            
+
+            //tint every object on a mission blue
+            if boardgameobject.isonmission{
+
+                toreturn.tint_object_colour(gameobjectname.clone(), (0, 0, 0), 0.5);
+                toreturn.tint_object_colour(gameobjectname, (250, 0, 250), 0.4);
+            }
             
             
         };
@@ -273,8 +281,11 @@ impl LocalGameInterface{
                 toreturn.new_card_effect_display(effect);
 
             }
-
         }
+
+
+
+
 
         
         
