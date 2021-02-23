@@ -457,6 +457,7 @@ dependencies = [
 [[package]]
 name = "physicsengine"
 version = "0.1.0"
+source = "git+https://github.com/guccialex/ccp-game/?branch=main#43fd6e1e4b2fdfb22ac94f59bfa0fbd6dcd01127"
 dependencies = [
  "bincode",
  "nalgebra",

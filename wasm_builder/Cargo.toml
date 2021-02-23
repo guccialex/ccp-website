@@ -10,10 +10,12 @@ edition = "2018"
 [dependencies]
 
 
-#physicsengine = { git = "https://github.com/guccialex/ccp-game/", branch = "main" }
+physicsengine = { git = "https://github.com/guccialex/ccp-game/", branch = "main" }
 
 #for testing, the source above is for deploying
-physicsengine = { path = "../../ccp-game" }
+
+
+#physicsengine = { path = "../../ccp-game" }
 
 
 wasm-bindgen = { version = "*", features = ["serde-serialize"] }
