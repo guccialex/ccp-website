@@ -325,6 +325,7 @@ impl LocalGameInterface{
     }
     
     
+    
     pub fn receive_game_update(&mut self, string: Vec<u8>){
         
         if let Ok(newgame) = bincode::deserialize::<MainGame>(&string){

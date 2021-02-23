@@ -1,8 +1,4 @@
-
-
 //http://0.0.0.0:8082/index.html?port=2432&password=F38d
-
-
 
 
 
@@ -11,7 +7,34 @@ console.log("updated with scriptjs working");
 let baseurl = window.location.origin;
 
 
-let publicgamerequest = baseurl + "/matchmaker-api/join_public_game";
+
+//first, send a message to get the list of games
+let listrequest = new XMLHttpRequest();
+listrequest.open("GET", baseurl+ "/get_available_games", true); // true for asynchronous 
+
+listrequest.onload() = () => {
+
+    console.log( listrequest.response );
+
+    var gamelist = JSON.parse( listrequest.response );
+
+    for (gameinfo of gamelist) {
+    
+        let btn = document.createElement( "BUTTON");
+
+        btn.innerHTML = JSON.stringify( gameinfo );
+        
+        document.body.appendChild(btn);
+    }
+
+};
+
+listrequest.send();
+
+
+
+/*
+//let publicgamerequest = baseurl + "/matchmaker-api/join_public_game";
 let gamefilesurl = baseurl + "/ccpgame";
 
 
@@ -23,7 +46,9 @@ console.log(baseurl);
 let foundgame = "";
 
 
+
 let xmlHttp = new XMLHttpRequest();
+xmlHttp.open("GET", baseurl+ "/get_available_games", true);
 
 
 
@@ -64,6 +89,9 @@ xmlHttp.onreadystatechange = function() {
 };  
 
 
+
+
+
 function ConnectToFoundGame() {
 
     window.open(foundgame);
@@ -82,6 +110,7 @@ function ConnectToPublicGame() {
     xmlHttp.send();
     
 }
+*/
 
 
 

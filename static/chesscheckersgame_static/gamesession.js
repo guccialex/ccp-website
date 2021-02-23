@@ -53,7 +53,7 @@ async function run(websocketaddress, gamepassword) {
     
     await init();
     
-    console.log("running connected to server");
+    console.log("connected to game server");
     console.log(websocketaddress);
     
     
@@ -73,10 +73,11 @@ async function run(websocketaddress, gamepassword) {
     
     socket.onmessage = function (event) {
         
-        console.log("connected to game");
         
         //if its a message that im connected to the game
         if (event.data == "connected to game as player 1"){
+
+            console.log("GAME STARTING");
             
             //remove the "onmessage "event listener
             socket.onmessage = null;
@@ -86,6 +87,8 @@ async function run(websocketaddress, gamepassword) {
         }
         //if its a message that im connected to the game
         else if (event.data == "connected to game as player 2"){
+
+            console.log("GAME STARTING");
             
             //remove the "onmessage "event listener
             socket.onmessage = null;
