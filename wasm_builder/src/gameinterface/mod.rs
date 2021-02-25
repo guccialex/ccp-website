@@ -87,6 +87,29 @@ impl LocalGameInterface{
     }
     
     
+    pub fn receive_game_update(&mut self, stringstate: String){
+
+        if let Ok(_) = self.thegame.set_string_state(stringstate){
+            //successfully set
+        }
+        else{
+            panic!("the string state couldnt be serialized into the game state");
+        }
+        
+        /*
+        if let Ok(newgame) = bincode::deserialize::<MainGame>(&string){
+            
+            self.thegame = newgame;
+        }
+        else{
+            panic!("didnt work");
+        }
+        */
+        
+    }
+    
+    
+    
     
     
     
@@ -329,29 +352,6 @@ impl LocalGameInterface{
     pub fn can_object_be_dragged(&self, object: ObjectType) -> bool{
         
         true
-    }
-    
-    
-    
-    pub fn receive_game_update(&mut self, stringstate: String){
-
-        if let Ok(_) = self.thegame.set_string_state(stringstate){
-            //successfully set
-        }
-        else{
-            panic!("the string state couldnt be serialized into the game state");
-        }
-        
-        /*
-        if let Ok(newgame) = bincode::deserialize::<MainGame>(&string){
-            
-            self.thegame = newgame;
-        }
-        else{
-            panic!("didnt work");
-        }
-        */
-        
     }
     
     
