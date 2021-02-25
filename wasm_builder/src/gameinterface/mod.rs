@@ -326,8 +326,16 @@ impl LocalGameInterface{
     
     
     
-    pub fn receive_game_update(&mut self, string: Vec<u8>){
+    pub fn receive_game_update(&mut self, stringstate: String){
+
+        if let Ok(_) = self.thegame.set_string_state(stringstate){
+            //successfully set
+        }
+        else{
+            panic!("the string state couldnt be serialized into the game state");
+        }
         
+        /*
         if let Ok(newgame) = bincode::deserialize::<MainGame>(&string){
             
             self.thegame = newgame;
@@ -335,6 +343,7 @@ impl LocalGameInterface{
         else{
             panic!("didnt work");
         }
+        */
         
     }
     
