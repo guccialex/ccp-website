@@ -741,12 +741,7 @@ class GameInterface{
     
     //get a websocket message from the server
     get_message(message){
-        
-        //console.log("receiving a message from the server", message);
-        
-        //let data = new Uint8Array( message.arrayBuffer());
-        
-        //console.log("something", data);
+
         
         //give the received message to the game
         this.wasmgame.get_incoming_socket_message( message );

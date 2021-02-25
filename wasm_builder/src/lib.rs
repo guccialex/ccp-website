@@ -137,9 +137,6 @@ impl FullGame{
     //give this wasm struct a message from the server
     pub fn get_incoming_socket_message(&mut self, message: String){
         
-        //let backtovecofchar = message.chars().collect::<Vec<_>>();
-        //let backtogamebin = backtovecofchar.iter().map(|c| *c as u8).collect::<Vec<_>>();
-        
         self.localgame.receive_game_update( message );
     }
     
@@ -196,10 +193,7 @@ impl FullGame{
         }
         
         return false;        
-    }
-    
-    
-    
+    }    
     
     
     

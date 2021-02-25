@@ -457,7 +457,6 @@ dependencies = [
 [[package]]
 name = "physicsengine"
 version = "0.1.0"
-source = "git+https://github.com/guccialex/ccp-game/?branch=main#43fd6e1e4b2fdfb22ac94f59bfa0fbd6dcd01127"
 dependencies = [
  "bincode",
  "nalgebra",
@@ -898,7 +897,6 @@ checksum = "1d649a3145108d7d3fbcde896a468d1bd636791823c9921135218ad89be08307"
 name = "wasm_builder"
 version = "0.1.0"
 dependencies = [
- "bincode",
  "console_error_panic_hook",
  "physicsengine",
  "serde",

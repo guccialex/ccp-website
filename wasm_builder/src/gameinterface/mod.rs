@@ -76,6 +76,12 @@ impl LocalGameInterface{
     
     //tick the local game
     pub fn tick(&mut self) {
+
+        
+        //let stringstate = self.thegame.get_string_state();
+        //panic!("the strinsgttate {:?}", stringstate);
+        //self.thegame.set_string_state(stringstate);
+        
         
         self.thegame.tick();
     }
@@ -253,7 +259,8 @@ impl LocalGameInterface{
             for highlightedobject in highlightedobjects{
                 
                 let highlightedobjectname = highlightedobject.to_objectname();
-                toreturn.set_gameobject_colour(highlightedobjectname, (0,255,0));
+                //toreturn.set_gameobject_colour(highlightedobjectname, (0,255,0));
+                toreturn.tint_object_colour(highlightedobjectname, (0,255,0), 0.65);
             }
         }
 
