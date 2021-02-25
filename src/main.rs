@@ -9,6 +9,11 @@ use rocket_contrib::serve::{StaticFiles};
 
 fn main() {
 
+
+    use rocket::http::Header;
+
+    let header = Header::new("X-Custom-Header", "custom value");
+
     //priority of mounted paths is in lowest to highest priority it seems?
     rocket::ignite()
     .mount("/", routes![ health_check ])

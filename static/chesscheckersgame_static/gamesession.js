@@ -127,8 +127,12 @@ async function start(socket, playerid){
     
     //canvas.style.width = "800px";
     //canvas.style.height = "400px"; 
+
+    let options = {
+        //timeStep : 1000/10,
+    };
     
-    let engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
+    let engine = new BABYLON.Engine(canvas, true, options, true); // Generate the BABYLON 3D engine
     
     canvas.style.width = '100%';
     canvas.style.height = '100%';
@@ -186,12 +190,15 @@ async function rungame(thegame) {
         thegame.mousemove();
     });
     
+
+    setInterval( function(){ thegame.tick(); }, 1000/30 );
     
     //run the tick function of the game 30 times per second
+    /*
     thegame.gameappearance.engine.runRenderLoop(function () {
-        
         thegame.tick();
     });
+    */
     
 }
 

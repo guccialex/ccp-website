@@ -1,144 +1,158 @@
 //http://0.0.0.0:8082/index.html?port=2432&password=F38d
 
 
+console.log("script working");
 
-console.log("updated with scriptjs working");
 
 let baseurl = window.location.origin;
 
+let getgamesrequesturl = "http://bbbbeeee.com/matchmaker-api/get_available_games";
+let joingameurl = "http://bbbbeeee.com/matchmaker-api/join_game/";
+let ccpgameurl = baseurl + "/ccpgame/"
+
+RefreshGameList();
+
+setInterval( function(){ RefreshGameList(); }, 6000);
 
 
-//first, send a message to get the list of games
-let listrequest = new XMLHttpRequest();
-listrequest.open("GET", baseurl+ "/get_available_games", true); // true for asynchronous 
 
-
-listrequest.onreadystatechange = function(){
-
-    console.log( this.responseText );
-
-    var gamelist = JSON.parse( this.responseText );
-
-    for (gameinfo of gamelist) {
+function create_join_game_button(gameid, playersingame){
     
-        let btn = document.createElement("BUTTON");
-        btn.innerHTML = JSON.stringify( gameinfo );
-        document.body.appendChild(btn);
+    let btn = document.createElement("BUTTON");
+    btn.innerHTML = "Join Game #" + gameid + " ("+ playersingame +"/2) in game";
+
+    let tempvalue = gameid;
+    if (playersingame >= 2){
+        btn.style.color = "grey";
+    }
+    else{
+
+        if (playersingame == 1){
+            btn.style.color = "purple";
+        }
+        else{
+            btn.style.color = "green";
+        }
+
+        btn.onclick = function(){
+            joingame(tempvalue);
+        };
     }
 
-};
-
-listrequest.send();
-
-
-
-/*
-//let publicgamerequest = baseurl + "/matchmaker-api/join_public_game";
-let gamefilesurl = baseurl + "/ccpgame";
-
-
-console.log(publicgamerequest);
-console.log(gamefilesurl);
-console.log(baseurl);
-
-
-let foundgame = "";
-
-
-
-let xmlHttp = new XMLHttpRequest();
-xmlHttp.open("GET", baseurl+ "/get_available_games", true);
-
-
-
-xmlHttp.onreadystatechange = function() {
-
-    console.log(xmlHttp.responseText);
-
-    document.getElementById("demo").innerHTML = "connection failed :(";
-
-
-    let response = JSON.parse( xmlHttp.responseText );
-
-    //connect to the game
-    let querystring = "/?";
+    btn.style.width = '200px';
+    btn.style.height = '40px';
+    btn.style.fontWeight = '900';
     
-    //make the query string for connecting to the game
-    querystring += "addressandport=" + response.addressandport;
-    querystring += "&";
-    querystring += "gamepassword=" + response.gamepassword;
-
-    let fulladdress = gamefilesurl + querystring;
-
-    console.log(fulladdress);
-
-
-    //change the "connect to public game" button to green
-    //and then when you click it again it sends you to the game
+    //so i can delete this button when updating the list of games
+    btn.className = "joingamebutton";
     
-    foundgame = fulladdress;
-
-
-
-    document.getElementById("demo").innerHTML = "";
-
-    var x = document.getElementById("GameFound");
-    x.style.display = "block";
-
-};  
-
-
-
-
-
-function ConnectToFoundGame() {
-
-    window.open(foundgame);
-
+    document.body.appendChild(btn);
 }
 
 
 
 
-function ConnectToPublicGame() {
 
-    document.getElementById("demo").innerHTML = "connecting to public game";
-
+function joingame(gameid) {
     
-    xmlHttp.open("GET", publicgamerequest, true); // true for asynchronous 
-    xmlHttp.send();
+    console.log("joining game " + gameid);
+
+    let joingamerequest = new XMLHttpRequest();
     
-}
-*/
+    joingamerequest.open("GET", joingameurl + gameid, false); // true for asynchronous
 
+    joingamerequest.onreadystatechange = function(){
+        
+        //console.log( this.responseText );
+        
+        var gameinfo = JSON.parse( this.responseText );
 
+        console.log(gameinfo.addressandport);
+        console.log(gameinfo.gamepassword);
 
-/*
+        let querystring = "?";
+        querystring += "addressandport=" + gameinfo.addressandport;
+        querystring += "&";
+        querystring += "gamepassword=" + gameinfo.gamepassword;
 
-    <button onclick="CreatePrivateGame()">create a private game</button>
-    <br>
-    <br>
-    <input type="text" id="gamepassword" value="password">
-    <button onclick="ConnectToPrivateGame()">join a private game</button>
-    <br>
+        let fullurl = ccpgameurl + querystring;
 
+        window.open(fullurl);
 
-function ConnectToPrivateGame() {
-    document.getElementById("demo").innerHTML = "connecting to private game";
-
-    let password = document.getElementById("gamepassword").value;
+    };
     
-    xmlHttp.open("GET", publicgamerequest, true); // true for asynchronous 
-    xmlHttp.send();
-}
-
-
-function CreatePrivateGame() {
-    document.getElementById("demo").innerHTML = "creating private game";
-
-    xmlHttp.open("GET", publicgamerequest, true); // true for asynchronous 
-    xmlHttp.send();
+    joingamerequest.send();
 }
 
 
-*/
+
+
+
+
+function RefreshGameList(){
+
+    DeleteOldGameList();
+    SetNewGameList();
+
+    //setTimeout(() => { SetNewGameList(); }, 10);
+    
+}
+
+
+
+
+function DeleteOldGameList(){
+
+    //clear all previously made buttons
+    var oldbuttons = document.getElementsByClassName("joingamebutton");
+
+    for (let index = 0; index < 100; index++) {
+        if (oldbuttons[0] != null){
+            oldbuttons[0].remove();
+        }
+    }
+
+}
+
+
+
+function SetNewGameList(){
+    
+    //first, send a message to get the list of games
+    let listrequest = new XMLHttpRequest();
+    
+    listrequest.open("GET", getgamesrequesturl, false); // true for asynchronous 
+    
+    listrequest.onreadystatechange = function(){
+        
+        console.log( this.responseText );
+        
+        var gamelist = JSON.parse( this.responseText );
+        
+        for (gameinfo of gamelist) {
+            
+            create_join_game_button(gameinfo[0], gameinfo[1]);
+            
+            var x = document.createElement("BR");
+            x.className = "joingamebutton";
+            document.body.appendChild(x);
+
+        }
+
+
+        if (gamelist.length == 0){
+
+            var x = document.createElement("P");
+            x.innerText = "NO AVAILABLE SERVERS RIGHT NOW";  
+            x.className = "joingamebutton";
+            x.style.color = "pink";
+            x.style.fontSize = "60px";
+            x.style.fontWeight = "1000";
+            document.body.appendChild(x);
+
+        }
+        
+    };
+    
+    listrequest.send();
+}
