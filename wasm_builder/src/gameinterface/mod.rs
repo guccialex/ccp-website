@@ -93,7 +93,7 @@ impl LocalGameInterface{
             //successfully set
         }
         else{
-            panic!("the string state couldnt be serialized into the game state");
+            panic!("the string state couldnt be serialized into the game state which was{:?}", stringstate);
         }
         
         /*
