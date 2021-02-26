@@ -6,3 +6,4 @@
 /static/chesscheckersgame_static/wasmfiles/
 /static/chesscheckersgame_static/.cache/
 /static/chesscheckersgame_static/dist/
+/Cargo.lock

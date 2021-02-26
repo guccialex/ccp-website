@@ -719,7 +719,6 @@ class GameInterface{
     constructor(engine, socket, playerid){
         
         
-        
         //create the "appearance" object for this game, giving it the scene of the engine
         this.gameappearance = new GameApperance(engine, this, playerid);
         
