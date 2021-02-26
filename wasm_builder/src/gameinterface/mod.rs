@@ -89,7 +89,7 @@ impl LocalGameInterface{
     
     pub fn receive_game_update(&mut self, stringstate: String){
 
-        if let Ok(_) = self.thegame.set_string_state(stringstate){
+        if let Ok(_) = self.thegame.set_string_state(stringstate.clone()){
             //successfully set
         }
         else{
