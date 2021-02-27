@@ -5,16 +5,17 @@ WORKDIR /home
 COPY . .
 
 
-RUN cargo update
 RUN rustup update nightly
 RUN rustup default nightly
-
+RUN cargo update
 
 #install wasm-pack
 RUN curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
+
 #build the wasm package with the target of web
 RUN wasm-pack build wasm_builder --target web --release
+
 
 #delete the old wasm files
 RUN rm static/chesscheckersgame_static/wasmfiles/ -rf

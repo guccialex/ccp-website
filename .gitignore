@@ -7,3 +7,4 @@
 /static/chesscheckersgame_static/.cache/
 /static/chesscheckersgame_static/dist/
 /Cargo.lock
+/wasm_builder/Cargo.lock
