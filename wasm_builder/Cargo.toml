@@ -10,16 +10,16 @@ edition = "2018"
 [dependencies]
 
 
-physicsengine = { git = "https://github.com/guccialex/ccp-game/", branch = "main" }
+#physicsengine = { git = "https://github.com/guccialex/ccp-game/", branch = "main" }
 
 #for testing, the source above is for deploying
 
+physicsengine = { path = "../../ccp-game" }
 
-#physicsengine = { path = "../../ccp-game" }
-
-
+#0.2.71
 wasm-bindgen = { version = "*", features = ["serde-serialize"] }
 
+#1.0.123
 serde = { version = "*", features = ["derive"] }
 
 
@@ -31,7 +31,7 @@ crate-type = ["cdylib"]
 
 
 [package.metadata.wasm-pack.profile.release]
-wasm-opt = false
+#wasm-opt = false
 
 
 [profile.release]

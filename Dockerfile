@@ -5,9 +5,11 @@ WORKDIR /home
 COPY . .
 
 
+
 RUN rustup update nightly
 RUN rustup default nightly
 RUN cargo update
+
 
 #install wasm-pack
 RUN curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
