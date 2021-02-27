@@ -96,16 +96,6 @@ impl LocalGameInterface{
             panic!("the string state couldnt be serialized into the game state which was{:?}", stringstate);
         }
         
-        /*
-        if let Ok(newgame) = bincode::deserialize::<MainGame>(&string){
-            
-            self.thegame = newgame;
-        }
-        else{
-            panic!("didnt work");
-        }
-        */
-        
     }
     
     

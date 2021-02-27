@@ -45,7 +45,6 @@ extern "C" {
 
 
 
-
 use std::collections::HashSet;
 
 
@@ -115,6 +114,7 @@ pub struct FullGame{
 
 #[wasm_bindgen]
 impl FullGame{
+
     
     pub fn new(playerid: u8) -> FullGame{
         
@@ -133,6 +133,9 @@ impl FullGame{
         }
         
     }
+
+
+
     
     //give this wasm struct a message from the server
     pub fn get_incoming_socket_message(&mut self, message: String){
@@ -152,11 +155,12 @@ impl FullGame{
         self.queuedoutgoingsocketmessages.remove(0)
     }
     
+
     pub fn tick(&mut self){
-        
-        //tick
+    
         self.localgame.tick();
     }
+    
     
     //return an object with the data of what the game should look like currently
     pub fn get_appearance_data(&mut self) -> JsValue{
@@ -194,8 +198,6 @@ impl FullGame{
         
         return false;        
     }    
-    
-    
     
     
     //player input functions
@@ -312,7 +314,6 @@ impl FullGame{
         //clear the object being dragged
         self.clientstate.dragged = None;
     }
-    
     
 }
 
@@ -442,8 +443,6 @@ impl ObjectType{
 
 
 }
-
-
 
 
 
