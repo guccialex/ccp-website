@@ -14,7 +14,7 @@ use serde::{Serialize, Deserialize};
 
 use std::collections::HashMap;
 
-use physicsengine::GameEffect;
+use physicsengine::GameEffects;
 
 use physicsengine::CardEffect;
 
@@ -41,13 +41,13 @@ pub struct FullAppearanceState{
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 struct Overlay{
-
+    
     image: String,
-
+    
     scale: f32,
-
+    
     position: (f32,f32),
-
+    
 }
 
 
@@ -59,7 +59,7 @@ impl FullAppearanceState{
             objects: Vec::new(),
             
             winningplayer: None,
-
+            
             overlay: None,
         }   
     }
@@ -83,6 +83,7 @@ impl FullAppearanceState{
 
 //the public methods to this
 impl FullAppearanceState{
+    
     
     
     
@@ -307,154 +308,80 @@ impl FullAppearanceState{
     }
     
     
-    
-    pub fn new_game_effect(&mut self, gameeffect: &GameEffect, number: &u32 ){
+    pub fn new_game_effects(&mut self, gameeffects: &GameEffects, playerid: &u8){
         
+        let effects= gameeffects.get_effect_names();
         
-        let xnumb = number % 3;
-        let znumb = number / 3;
+        let mut totalcards = 0;
         
-        //the position 
-        let xpos = xnumb as f32 * 2.75 + 7.5;
-        let ypos = 0.0 ;//+ *number as f32;
-        let zpos = 4.0 - znumb as f32 * 4.0 ;//+ *number as f32;
+        for effect in effects{
+            
+            let xnumb = totalcards % 3;
+            let znumb = totalcards / 3;
+            
+            //the position 
+            let xpos = xnumb as f32 * 2.75 + 7.5;
+            let ypos = 0.0 ;//+ *number as f32;
+            let zpos = 4.0 - znumb as f32 * 4.0 ;//+ *number as f32;
+            
+            let name = format!("CardNumber{}",totalcards);
+            
+            let mut toadd =  AppearanceData::default_object( name , (xpos, ypos, zpos) , (0.0, 3.14/2.0 ,0.0) );
+
+            
+            toadd.set_cube( (0.1, 3.5, 2.25) );
+            toadd.set_image(effect);
+            /*
+            else if let GameEffect::RaisedSquares(number) = gameeffect{
+                
+                let firstline = format!("{:?}", number);
+                
+                toadd.add_text(firstline, (0.0,70.0), 60);
+                toadd.add_text("raised".to_string(), (0.0,100.0), 25);
+                toadd.add_text("squares".to_string(), (0.0,130.0), 25);
+            }
+            else if let GameEffect::RemovedSquares(number) = gameeffect{
+                
+                let firstline = format!("{:?}", number);
+                
+                toadd.add_text(firstline, (0.0,70.0), 60);
+                toadd.add_text("removed".to_string(), (0.0,100.0), 25);
+                toadd.add_text("squares".to_string(), (0.0,130.0), 25);
+            }
+            else if let GameEffect::TurnsTimed(ticks) = gameeffect{
+                
+                let seconds = ticks / 60;
+                let text = format!("Turns Are");
+                let text2 = format!("{:?} seconds", seconds);
+                
+                toadd.add_text( text, (0.0,35.0) , 35 );
+                toadd.add_text( text2, (0.0,70.0) , 35 );   
+            }
+            */
 
 
-        let mut name = "default".to_string();
-
-
-        if let GameEffect::DoubleTurns = gameeffect{
-            name = "double_turns_card".to_string();
-        }
-        else if let GameEffect::KingsReplaced = gameeffect{
-            name = "kings_replaced".to_string();
-        }
-        else if let GameEffect::PawnsNotPromoted = gameeffect{
-            name = "pawns_arent_promoted".to_string();
-        }
-        else if let GameEffect::PoolGame = gameeffect{
-            name = "pool_game".to_string();
-        }
-        else if let GameEffect::TurnsTimed(_) = gameeffect{
-            name = "turns timed".to_string();
-        }
-        else if let GameEffect::RaisedSquares(_) = gameeffect{
-            name = "turns timed".to_string();
+            self.objects.push(toadd);
+            
+            totalcards += 1;
         }
         
-        
-        
-        let mut toadd =  AppearanceData::default_object( name , (xpos, ypos, zpos) , (0.0, 3.14/2.0 ,0.0) );
-
-
-        
-        toadd.set_cube( (0.1, 3.5, 2.25) );
-
-
-
-        
-
-        if let GameEffect::DoubleTurns = gameeffect{
-
-            toadd.set_image("effectcards/backtoback_e.png".to_string());
-        }
-        else if let GameEffect::KingsReplaced = gameeffect{
-   
-            toadd.set_image("effectcards/kingsreplaced_c.png".to_string());
-        }
-        else if let GameEffect::PawnsNotPromoted = gameeffect{
-
-            toadd.set_image("effectcards/pawnsnotpromoted_c.png".to_string());
-        }
-        else if let GameEffect::PoolGame = gameeffect{
-
-            toadd.set_image("effectcards/poolgame_e.png".to_string() );
-        }
-        else if let GameEffect::RaisedSquares(number) = gameeffect{
-
-            let firstline = format!("{:?}", number);
-
-            toadd.add_text(firstline, (0.0,70.0), 60);
-            toadd.add_text("raised".to_string(), (0.0,100.0), 25);
-            toadd.add_text("squares".to_string(), (0.0,130.0), 25);
-
-        }
-        else if let GameEffect::RemovedSquares(number) = gameeffect{
-
-            let firstline = format!("{:?}", number);
-
-            toadd.add_text(firstline, (0.0,70.0), 60);
-            toadd.add_text("removed".to_string(), (0.0,100.0), 25);
-            toadd.add_text("squares".to_string(), (0.0,130.0), 25);
-
-        }
-        else if let GameEffect::TurnsTimed(ticks) = gameeffect{
-
-            let seconds = ticks / 60;
-            let text = format!("Turns Are");
-            let text2 = format!("{:?} seconds", seconds);
-               
-            toadd.add_text( text, (0.0,35.0) , 35 );
-            toadd.add_text( text2, (0.0,70.0) , 35 );
-
-        }
-
-
-        
-
-
-
-
-        //its 1 unit = 1.5 inches
-        //because a board square is 1.5 inches
-        //and a playing card is 2.25" * 3.5"
-        
-        //the coordinates apparently map to 
-        //0 -> y
-        //1 -> x
-        //2 -> z
-        
-        
-        self.objects.push(toadd);
         
     }
-
-
-
-
+        
+    
+    
+    
     pub fn new_card_effect_display(&mut self, cardeffect: & CardEffect){
-
         
-
-        if let CardEffect::makepoolgame = cardeffect{
-
-            self.set_overlay("effectcards/poolgame_e.png".to_string(), 0.15, (0.0, 0.0) );
-        }
-        else if let CardEffect::backtobackturns = cardeffect{
-
-            self.set_overlay("effectcards/backtoback_e.png".to_string(), 0.15, (0.0, 0.0) );
-        }
-        else if let CardEffect::halvetimeleft = cardeffect{
-
-            self.set_overlay("effectcards/halvetimeleft_e.png".to_string(), 0.15, (0.0, 0.0) );
-        }
-        else if let CardEffect::raisesomesquares(_) = cardeffect{
-
-            self.set_overlay("effectcards/raisesquares_e.png".to_string(), 0.15, (0.0, 0.0) );
-        }
-        else if let CardEffect::removesomesquares(_) = cardeffect{
-
-            self.set_overlay("effectcards/dropsquares_e.png".to_string(), 0.15, (0.0, 0.0) );
-        }
         
-
-
-
+        self.set_overlay( cardeffect.get_card_texture_location() , 0.15, (0.0, 0.0) );
+        
+        
     }
     
-
-
-
+    
+    
+    
     
     
     pub fn new_boardsquare(&mut self, objectname: String, position: (f32,f32,f32), rotation: (f32,f32,f32), white: bool ){
@@ -478,15 +405,15 @@ impl FullAppearanceState{
     
     
     
-
+    
     fn set_overlay(&mut self, image: String, scale: f32, position: (f32,f32)){
-
+        
         self.overlay = Some(Overlay{
-
+            
             image: image,
             
             scale: scale,
-
+            
             position: position,
         });
         
@@ -520,8 +447,8 @@ pub struct AppearanceData{
     
     //the texture
     texture: Option<Texture>,
-
-
+    
+    
 }
 
 
@@ -548,7 +475,7 @@ impl AppearanceData{
             shapetype: None,//ShapeType::Cube(shape),
             
             texture: None,//texture,
-
+            
         }
     }
     
@@ -630,37 +557,37 @@ impl AppearanceData{
     
     fn add_text(&mut self, text: String, position: (f32,f32), fontsize: u32){
         //this overrides any texture set for whatever reason
-
+        
         //toadd.add_text( "Pawns Arent".to_string(), (0.0,35.0) , 30 );
         //toadd.add_text( "Promoted".to_string(), (0.0,70.0) , 35 );
-
-
+        
+        
         
         //if texture doesnt exist create it
         if self.texture.is_none(){
             self.texture = Some(Texture::default_texture());
         };
         
-
+        
         let mut xsize = 100.0;
         let mut ysize = 100.0;
-
+        
         //get the dimensions to get the size
         if let Some( ShapeType::Cube( CubeShape(x,y,z) ) ) = &self.shapetype{
             xsize = z * 50.0;
             ysize = y * 50.0;
         }
-
+        
         
         if let Some(texture) = &mut self.texture{
             texture.texts.push(Text{
                 text: text,
                 position: position,
                 fontsize: fontsize,
-
+                
                 xsize: xsize,
                 ysize: ysize,
-
+                
             });
         };
         
@@ -680,8 +607,8 @@ impl AppearanceData{
         };
         
     }
-
-
+    
+    
     
 }
 
@@ -758,8 +685,8 @@ struct Text{
     position: (f32,f32),
     
     fontsize: u32,
-
-
+    
+    
     xsize: f32,
     ysize: f32,
 }

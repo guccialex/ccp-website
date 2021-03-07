@@ -13,7 +13,7 @@ use physicsengine::PieceAction;
 use physicsengine::VisibleGameObjectType;
 //use std::collections::HashSet;
 
-use physicsengine::GameEffect;
+use physicsengine::GameEffects;
 
 
 
@@ -60,6 +60,7 @@ impl LocalGameInterface{
         
         
         let thegame = MainGame::new_two_player();
+
         
         LocalGameInterface{
             
@@ -76,7 +77,7 @@ impl LocalGameInterface{
     
     //tick the local game
     pub fn tick(&mut self) {
-
+        
         
         //let stringstate = self.thegame.get_string_state();
         //panic!("the strinsgttate {:?}", stringstate);
@@ -88,7 +89,7 @@ impl LocalGameInterface{
     
     
     pub fn receive_game_update(&mut self, stringstate: String){
-
+        
         if let Ok(_) = self.thegame.set_string_state(stringstate.clone()){
             //successfully set
         }
@@ -212,17 +213,35 @@ impl LocalGameInterface{
             
             if let physicsengine::VisibleGameObjectType::Piece(pieceobject) = &boardgameobject.objecttype{
                 
-                toreturn.new_piece( gameobjectname.clone(), pieceobject.typename.clone(), boardgameobject.position, boardgameobject.rotation, pieceobject.owner );
+                
+                let rotation;
+                
+                //if its from player 2's perspective, rotate each piece 180 degrees 
+                //and rotate each card by 180 degrees
+                if self.playerid == 2{
+                    //i need to rotate around the objects z axis, not around the world's z axis
+                    //right now im just rotating around the worlds z axis but i should change that
+                    rotation = (boardgameobject.rotation.0 , boardgameobject.rotation.1 + 3.1416, boardgameobject.rotation.2);
+                }
+                else{
+                    rotation = boardgameobject.rotation;
+                }
+                
+                
+                toreturn.new_piece( gameobjectname.clone(), pieceobject.typename.clone(), boardgameobject.position, rotation, pieceobject.owner );
+                
+                
+                
             }
             else if let physicsengine::VisibleGameObjectType::Square(squareobject) = &boardgameobject.objecttype{
                 
                 toreturn.new_boardsquare( gameobjectname.clone(), boardgameobject.position, boardgameobject.rotation, squareobject.iswhite );
             };
             
-
+            
             //tint every object on a mission blue
             if boardgameobject.isonmission{
-
+                
                 toreturn.tint_object_colour(gameobjectname.clone(), (0, 0, 0), 0.5);
                 toreturn.tint_object_colour(gameobjectname, (250, 0, 250), 0.4);
             }
@@ -276,37 +295,44 @@ impl LocalGameInterface{
                 toreturn.tint_object_colour(highlightedobjectname, (0,255,0), 0.65);
             }
         }
+        
+        
+        
+        toreturn.new_game_effects( &ccpgamestate.gameeffects, &self.playerid );
 
-
-
+        /*
         let mut effectnumb = 0;
-
+        
         //get the effects on the board
         for effect in &ccpgamestate.gameeffects{
-
-            toreturn.new_game_effect(effect, &effectnumb);
-
+            
+            toreturn.new_game_effect(effect, &effectnumb, &self.playerid);
+            
             effectnumb += 1;
-
+            
         };
-
-
+        */
+        
+        
         //display the last card effect played 10 seconds ago
         //for cardeffect in &ccpgamestate.eff
-
+        
         if let Some( (effect, ticksago) ) = &ccpgamestate.lastcardeffect{
-
+            
             if ticksago < &60{
-
+                
                 toreturn.new_card_effect_display(effect);
-
+                
             }
         }
-
-
-
-
-
+        
+        
+        
+        
+        
+        
+        
+        
         
         
         
@@ -324,14 +350,14 @@ impl LocalGameInterface{
     pub fn is_object_selectable(&self, object: ObjectType) -> bool{
         
         if let ObjectType::piece(pieceid) = object{
-
+            
             let owner = self.thegame.get_board_game_object_owner(pieceid);
-
+            
             if owner == Some(self.playerid){
-
+                
                 return true;
             }
-
+            
         };
         
         return false;
@@ -352,7 +378,7 @@ impl LocalGameInterface{
     
     
     
-
+    
     
     
     //gets a map of every valid player input for this given object

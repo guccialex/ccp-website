@@ -112,7 +112,7 @@ async function run_serverless() {
     
     console.log("running NOT connected to server");
     
-    start(null, 1);
+    start(null, 2);
 }
 
 
@@ -244,6 +244,8 @@ class GameApperance{
         
         // This creates and positions a free camera (non-mesh)
         let camera = new BABYLON.ArcRotateCamera("camera1", 0, 0, 0, new BABYLON.Vector3(0.0,2.0,0.0), scene);
+
+        //camera.fov = camera.fov*1.5;
         
         //set the position of the camera, not its target tho
         if (playerid == 1){
@@ -308,7 +310,7 @@ class GameApperance{
         
         
         
-        var skybox = BABYLON.Mesh.CreateBox("skybox", 100.0, this.scene);
+        var skybox = BABYLON.Mesh.CreateBox("skybox", 200.0, this.scene);
         var skyboxMaterial = new BABYLON.StandardMaterial("skybox", this.scene);
         skyboxMaterial.backFaceCulling = false;
         skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("skybox/skybox", this.scene);
