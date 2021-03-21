@@ -817,7 +817,6 @@ class GameInterface{
         if (this.draggingobject){
             
             
-            
             var objectunder = this.gameappearance.scene.pick(this.gameappearance.scene.pointerX, this.gameappearance.scene.pointerY, function(mesh) {
                 
                 return mesh.name != "plane" && mesh.name != "dragindicator";  // the plane and drag indicator will not be pickable
@@ -849,9 +848,7 @@ class GameInterface{
                 
             }
             
-            
         }
-        
         
         
     }

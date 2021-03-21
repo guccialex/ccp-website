@@ -310,9 +310,18 @@ impl FullAppearanceState{
     
     pub fn new_game_effects(&mut self, gameeffects: &GameEffects, playerid: &u8){
         
-        let effects= gameeffects.get_effect_names();
+        let effects = gameeffects.get_game_effect_names();
         
         let mut totalcards = 0;
+
+        let mut yrot = 0.0;
+
+        if playerid == &1{
+            yrot = 3.14/2.0;
+        }
+        else if playerid == &2{
+            yrot = -3.14/2.0;
+        }
         
         for effect in effects{
             
@@ -320,63 +329,44 @@ impl FullAppearanceState{
             let znumb = totalcards / 3;
             
             //the position 
-            let xpos = xnumb as f32 * 2.75 + 7.5;
+            let xpos = xnumb as f32 * 2.75 + 6.0;
             let ypos = 0.0 ;//+ *number as f32;
-            let zpos = 4.0 - znumb as f32 * 4.0 ;//+ *number as f32;
+            let zpos;
+
+            if playerid == &1{
+                zpos = 4.0 - znumb as f32 * 4.0 ;//+ *number as f32;
+            }
+            else{
+                zpos = -4.0 + znumb as f32 * 4.0 ;//+ *number as f32;
+            }
+
+            
+
+
+
             
             let name = format!("CardNumber{}",totalcards);
             
-            let mut toadd =  AppearanceData::default_object( name , (xpos, ypos, zpos) , (0.0, 3.14/2.0 ,0.0) );
-
+            let mut toadd =  AppearanceData::default_object( name , (xpos, ypos, zpos) , (0.0, yrot, 0.0) );
+            
             
             toadd.set_cube( (0.1, 3.5, 2.25) );
-            toadd.set_image(effect);
-            /*
-            else if let GameEffect::RaisedSquares(number) = gameeffect{
-                
-                let firstline = format!("{:?}", number);
-                
-                toadd.add_text(firstline, (0.0,70.0), 60);
-                toadd.add_text("raised".to_string(), (0.0,100.0), 25);
-                toadd.add_text("squares".to_string(), (0.0,130.0), 25);
-            }
-            else if let GameEffect::RemovedSquares(number) = gameeffect{
-                
-                let firstline = format!("{:?}", number);
-                
-                toadd.add_text(firstline, (0.0,70.0), 60);
-                toadd.add_text("removed".to_string(), (0.0,100.0), 25);
-                toadd.add_text("squares".to_string(), (0.0,130.0), 25);
-            }
-            else if let GameEffect::TurnsTimed(ticks) = gameeffect{
-                
-                let seconds = ticks / 60;
-                let text = format!("Turns Are");
-                let text2 = format!("{:?} seconds", seconds);
-                
-                toadd.add_text( text, (0.0,35.0) , 35 );
-                toadd.add_text( text2, (0.0,70.0) , 35 );   
-            }
-            */
-
-
+            toadd.set_image("effectcards/".to_string() + &effect);
+            
+            
             self.objects.push(toadd);
             
             totalcards += 1;
         }
         
-        
     }
-        
+    
     
     
     
     pub fn new_card_effect_display(&mut self, cardeffect: & CardEffect){
         
-        
-        self.set_overlay( cardeffect.get_card_texture_location() , 0.15, (0.0, 0.0) );
-        
-        
+        self.set_overlay( "effectcards/".to_string() + &cardeffect.get_card_texture_location() , 0.15, (0.0, 0.0) );
     }
     
     
@@ -690,3 +680,41 @@ struct Text{
     xsize: f32,
     ysize: f32,
 }
+
+
+
+
+
+
+
+
+
+
+
+/*
+else if let GameEffect::RaisedSquares(number) = gameeffect{
+    
+    let firstline = format!("{:?}", number);
+    
+    toadd.add_text(firstline, (0.0,70.0), 60);
+    toadd.add_text("raised".to_string(), (0.0,100.0), 25);
+    toadd.add_text("squares".to_string(), (0.0,130.0), 25);
+}
+else if let GameEffect::RemovedSquares(number) = gameeffect{
+    
+    let firstline = format!("{:?}", number);
+    
+    toadd.add_text(firstline, (0.0,70.0), 60);
+    toadd.add_text("removed".to_string(), (0.0,100.0), 25);
+    toadd.add_text("squares".to_string(), (0.0,130.0), 25);
+}
+else if let GameEffect::TurnsTimed(ticks) = gameeffect{
+    
+    let seconds = ticks / 60;
+    let text = format!("Turns Are");
+    let text2 = format!("{:?} seconds", seconds);
+    
+    toadd.add_text( text, (0.0,35.0) , 35 );
+    toadd.add_text( text2, (0.0,70.0) , 35 );   
+}
+*/

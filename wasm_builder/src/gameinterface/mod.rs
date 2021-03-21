@@ -300,18 +300,6 @@ impl LocalGameInterface{
         
         toreturn.new_game_effects( &ccpgamestate.gameeffects, &self.playerid );
 
-        /*
-        let mut effectnumb = 0;
-        
-        //get the effects on the board
-        for effect in &ccpgamestate.gameeffects{
-            
-            toreturn.new_game_effect(effect, &effectnumb, &self.playerid);
-            
-            effectnumb += 1;
-            
-        };
-        */
         
         
         //display the last card effect played 10 seconds ago
@@ -322,16 +310,8 @@ impl LocalGameInterface{
             if ticksago < &60{
                 
                 toreturn.new_card_effect_display(effect);
-                
             }
         }
-        
-        
-        
-        
-        
-        
-        
         
         
         
@@ -372,12 +352,7 @@ impl LocalGameInterface{
     
     
     
-    
-    
-    
-    
-    
-    
+
     
     
     
