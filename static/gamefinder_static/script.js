@@ -59,7 +59,7 @@ function joingame(gameid) {
 
     let joingamerequest = new XMLHttpRequest();
     
-    joingamerequest.open("GET", joingameurl + gameid, false); // true for asynchronous
+    joingamerequest.open("GET", joingameurl + gameid, true); // true for asynchronous
 
     joingamerequest.onreadystatechange = function(){
         
@@ -121,7 +121,7 @@ function SetNewGameList(){
     //first, send a message to get the list of games
     let listrequest = new XMLHttpRequest();
     
-    listrequest.open("GET", getgamesrequesturl, false); // true for asynchronous 
+    listrequest.open("GET", getgamesrequesturl, true); // true for asynchronous 
     
     listrequest.onreadystatechange = function(){
         
