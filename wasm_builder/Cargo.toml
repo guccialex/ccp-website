@@ -17,10 +17,10 @@ physicsengine = { git = "https://github.com/guccialex/ccp-game/", branch = "main
 #physicsengine = { path = "../../ccp-game" }
 
 #0.2.71
-wasm-bindgen = { version = "*", features = ["serde-serialize"] }
+wasm-bindgen = { version = "0.2.71", features = ["serde-serialize"] }
 
 #1.0.123
-serde = { version = "*", features = ["derive"] }
+serde = { version = "1.0.123", features = ["derive"] }
 
 
 console_error_panic_hook = "0.1.6"
