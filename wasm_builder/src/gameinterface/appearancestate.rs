@@ -36,7 +36,6 @@ pub struct FullAppearanceState{
     //the overlay
     overlay: Option<Overlay>,
     
-    
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]

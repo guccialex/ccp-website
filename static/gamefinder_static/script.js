@@ -91,7 +91,8 @@ function joingame(gameid) {
 
 function RefreshGameList(){
 
-    DeleteOldGameList();
+    //deleting old game list should be done in teh set new game list function
+    //DeleteOldGameList();
     SetNewGameList();
 
     //setTimeout(() => { SetNewGameList(); }, 10);
@@ -124,6 +125,8 @@ function SetNewGameList(){
     listrequest.open("GET", getgamesrequesturl, true); // true for asynchronous 
     
     listrequest.onreadystatechange = function(){
+
+        DeleteOldGameList();
         
         console.log( this.responseText );
         
