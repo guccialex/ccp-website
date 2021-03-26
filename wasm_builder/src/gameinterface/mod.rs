@@ -177,7 +177,7 @@ impl LocalGameInterface{
         }
         
         
-        toreturn.new_deck( ccpgamestate.drawactionvalid );
+        toreturn.new_deck( ccpgamestate.turnsuntildrawavailable);
         
         toreturn.new_timer( 1, ccpgamestate.player1totalticksleft, ccpgamestate.playerswithactiveturns.contains(&1) );
         toreturn.new_timer( 2, ccpgamestate.player2totalticksleft, ccpgamestate.playerswithactiveturns.contains(&2) );

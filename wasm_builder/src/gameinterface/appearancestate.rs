@@ -193,22 +193,42 @@ impl FullAppearanceState{
         
     }
     
-    pub fn new_deck(&mut self, candraw: bool){
+    pub fn new_deck(&mut self, turnstilldraw: Option<u32>){
         
         let mut toadd = AppearanceData::default_object("deck".to_string(), (-7.0,0.0,0.0), (0.0,0.0,0.0));
         
-        if candraw{
-            
-            toadd.set_colour( (200,200,200) );            
-        }
-        else{
-            
-            toadd.set_colour( (0,0,0) );
-        }
         
         toadd.set_cube( (0.6, 1.96, 1.4) );
-        //toadd.set_image( "cardart/cardback.jpg".to_string() );
+
+
+        if let Some(tilldraw) = turnstilldraw{
+
+            //if can be drawn from
+            if tilldraw == 0{
+
+                toadd.set_colour( (100,254,100) );            
+                toadd.add_text(format!("DRAW"), (0.0,50.0), 27)
+
+            }
+            else{
+
+                toadd.set_colour( (100,100,100) );
+
+                if tilldraw < 10{
+                    toadd.add_text(format!("{}", tilldraw), (0.0,85.0), 92)
+                }
+                else{
+                    toadd.add_text(format!("{}", tilldraw), (0.0,70.0), 55)
+                }
+
+            }
+
         
+        }
+        else{
+
+            toadd.set_colour( (0,0,0) );
+        }
         
         self.objects.push(toadd);
     }

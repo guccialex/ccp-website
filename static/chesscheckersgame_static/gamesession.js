@@ -240,6 +240,10 @@ async function rungame(thegame) {
 class GameApperance{
     
     constructor(engine, gameinterface, playerid){
+
+        window.addEventListener("resize", function () { // Watch for browser/canvas resize events
+            engine.resize();
+        });
         
         //create a scene for the engine
         let scene = new BABYLON.Scene(engine);
