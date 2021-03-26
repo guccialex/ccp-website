@@ -58,19 +58,15 @@ impl LocalGameInterface{
     //create a game with a certain ID
     pub fn new(playerid: u8) -> LocalGameInterface{
         
-        
-        let thegame = MainGame::new_two_player();
-
+        let thegame = MainGame::new_solo_game();
         
         LocalGameInterface{
-            
             playerid: playerid,
             thegame:thegame,
             
             prevvisiblegameobject: HashMap::new(),
             
             prevappearance: HashMap::new(),
-            
         }
     }
     

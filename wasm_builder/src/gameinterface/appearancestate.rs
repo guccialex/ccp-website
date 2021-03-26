@@ -309,6 +309,8 @@ impl FullAppearanceState{
     
     pub fn new_game_effects(&mut self, gameeffects: &GameEffects, playerid: &u8){
         
+
+
         let effects = gameeffects.get_game_effect_names();
         
         let mut totalcards = 0;
@@ -357,6 +359,9 @@ impl FullAppearanceState{
             
             totalcards += 1;
         }
+
+
+
         
     }
     

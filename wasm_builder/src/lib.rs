@@ -119,8 +119,8 @@ impl FullGame{
     pub fn new(playerid: u8) -> FullGame{
         
         //set the panic hook so i get real error reporting
-        panic::set_hook( Box::new(console_error_panic_hook::hook) );
-
+        //panic::set_hook( Box::new(console_error_panic_hook::hook) );
+        console_error_panic_hook::set_once();
 
         
         FullGame{
