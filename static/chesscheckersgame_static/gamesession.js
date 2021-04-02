@@ -690,7 +690,17 @@ class GameApperance{
             //if it doesnt exist already yet
             if (this.wonbutton == null){
                 
-                var button1 = BABYLON.GUI.Button.CreateSimpleButton("wongui", "Congrats player " + appearancedata.winningplayer + " you won.");
+                let text;
+
+                if (this.wonbutton == 1){
+                    text = "Congrats white. You Won"
+                }
+                else {
+                    text = "Congrats black. You Won"
+                }
+
+                var button1 = BABYLON.GUI.Button.CreateSimpleButton("wongui", text);
+
                 button1.width = "550px"
                 button1.height = "200px";
                 button1.color = "white";

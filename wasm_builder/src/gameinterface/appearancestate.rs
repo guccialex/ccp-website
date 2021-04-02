@@ -174,7 +174,6 @@ impl FullAppearanceState{
             
             if let Some(prevappearance) = prevappearances.get( curname){
                 
-                
                 if prevappearance.shapetype == curappearance.shapetype{
                     self.remove_shape( curname.clone() );
                 }
@@ -183,19 +182,16 @@ impl FullAppearanceState{
                     
                     self.remove_texture( curname.clone() );
                 }
-                
             }
         }
         
         
-        
         curappearances
-        
     }
     
     pub fn new_deck(&mut self, turnstilldraw: Option<u32>){
         
-        let mut toadd = AppearanceData::default_object("deck".to_string(), (-7.0,0.0,0.0), (0.0,0.0,0.0));
+        let mut toadd = AppearanceData::default_object("deck".to_string(), (-6.0,0.0,0.0), (0.0,0.0,0.0));
         
         
         toadd.set_cube( (0.6, 1.96, 1.4) );
@@ -249,11 +245,11 @@ impl FullAppearanceState{
         let name;
         
         if playerid == 1{
-            position = (-7.0,0.0,-3.0);
+            position = (-5.6,0.0,-3.0);
             name = "player".to_string() + &playerid.to_string() + "timer";
         }
         else if playerid == 2{
-            position = (-7.0,0.0,3.0);
+            position = (-5.6,0.0,3.0);
             name = "player".to_string() + &playerid.to_string() + "timer";
         }
         else{
@@ -277,8 +273,8 @@ impl FullAppearanceState{
         let mut toadd = AppearanceData::default_object(name , position, (0.0,0.0,0.0));
         
         toadd.set_colour( colour );
-        toadd.set_cube( (0.01, 2.0, 2.0) );
-        toadd.add_text( timeleft, (0.0,30.0), 30);
+        toadd.set_cube( (0.01, 1.2, 3.0) );
+        toadd.add_text( timeleft, (0.0,50.0), 50);
         
         
         self.objects.push(toadd);
@@ -295,17 +291,17 @@ impl FullAppearanceState{
         if ownerid == 1{
             
             colour = (255,255,255);
-            texturename = "pieceart/".to_string() + &typename + &".png";
+            texturename = "pieceart/".to_string() + &typename ;
         }
         else if ownerid == 2{
             
             colour = (255,255,255);
-            texturename = "pieceart/b_".to_string() + &typename + &".png";
+            texturename = "pieceart/b_".to_string() + &typename;
         }
         else{
             
             colour = (255,5,255);
-            texturename = "pieceart/".to_string() + &typename + &".png";
+            texturename = "pieceart/".to_string() + &typename ;
         }
         
         
@@ -329,10 +325,9 @@ impl FullAppearanceState{
     
     pub fn new_game_effects(&mut self, gameeffects: &GameEffects, playerid: &u8){
         
-
-
         let effects = gameeffects.get_game_effect_names();
-        
+
+
         let mut totalcards = 0;
 
         let mut yrot = 0.0;
@@ -350,15 +345,15 @@ impl FullAppearanceState{
             let znumb = totalcards / 3;
             
             //the position 
-            let xpos = xnumb as f32 * 2.75 + 6.0;
+            let xpos = xnumb as f32 * 2.5 + 5.5;
             let ypos = 0.0 ;//+ *number as f32;
             let zpos;
 
             if playerid == &1{
-                zpos = 4.0 - znumb as f32 * 4.0 ;//+ *number as f32;
+                zpos = 4.0 - znumb as f32 * 3.7 ;//+ *number as f32;
             }
             else{
-                zpos = -4.0 + znumb as f32 * 4.0 ;//+ *number as f32;
+                zpos = -4.0 + znumb as f32 * 3.7 ;//+ *number as f32;
             }
 
             

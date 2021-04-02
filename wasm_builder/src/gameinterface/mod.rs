@@ -301,12 +301,10 @@ impl LocalGameInterface{
         //display the last card effect played 10 seconds ago
         //for cardeffect in &ccpgamestate.eff
         
-        if let Some( (effect, ticksago) ) = &ccpgamestate.lastcardeffect{
+        if let Some( effect ) = &ccpgamestate.lastcardeffect{
             
-            if ticksago < &60{
-                
-                toreturn.new_card_effect_display(effect);
-            }
+            toreturn.new_card_effect_display(effect);
+            
         }
         
         
