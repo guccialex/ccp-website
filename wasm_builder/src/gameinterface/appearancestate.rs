@@ -1,15 +1,4 @@
 
-
-//alright. I hate thinking about javascript
-//and I hate reading the docs on babylon js
-//theyre just so much more messy, unclear than anything in rust
-//and like
-//every object has at least 100 methods for some reason
-//so im going to be thinking about 
-//how
-//do i represent a state of the appearances of all the objects in a scene
-
-
 use serde::{Serialize, Deserialize};
 
 use std::collections::HashMap;
@@ -20,6 +9,7 @@ use physicsengine::CardEffect;
 
 
 //a struct representing the entire state of a games physical appearance
+//this struct is serialized and sent to the javascript frontend as json
 #[derive(Serialize, Deserialize, Clone)]
 pub struct FullAppearanceState{
     
@@ -28,14 +18,11 @@ pub struct FullAppearanceState{
     //the visible objects
     pub objects: Vec<AppearanceData>,
     
-    
     //if either player won
     winningplayer: Option<u8>,
     
-    
     //the overlay
     overlay: Option<Overlay>,
-    
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
@@ -46,7 +33,6 @@ struct Overlay{
     scale: f32,
     
     position: (f32,f32),
-    
 }
 
 
@@ -109,9 +95,12 @@ impl FullAppearanceState{
             if curobject.name == objectname{
                 
                 curobject.tint_colour(colour, tintamount);
-                
+
+                return ();
             }
         }
+
+        panic!("cannot find object {:?} to tint", objectname);
         
     }
     
@@ -229,7 +218,7 @@ impl FullAppearanceState{
         self.objects.push(toadd);
     }
     
-    pub fn new_timer(&mut self, playerid: u32, ticksleft: u32, currentlyturn: bool) {
+    pub fn new_timer(&mut self, playerid: u32, ticksleft: u32, currentlyturn: Option<u32>) {
         
         
         //the time left should be as minutes then seconds
@@ -258,7 +247,7 @@ impl FullAppearanceState{
         
         
         let colour;
-        if currentlyturn{
+        if let Some(_) = currentlyturn{
             colour = (0,255,0);
         }
         else{
@@ -282,42 +271,39 @@ impl FullAppearanceState{
         
     }
     
-    pub fn new_piece(&mut self, objectname: String, typename: String, position: (f32,f32,f32), rotation: (f32,f32,f32), ownerid: u8){
+    pub fn new_piece(&mut self, objectname: String, maybetypename: Option<String>, position: (f32,f32,f32), rotation: (f32,f32,f32), ownerid: u8){
         
-        
+        let mut toadd = AppearanceData::default_object( objectname, position, rotation);
+
+
         let texturename;
         let colour;
         
-        if ownerid == 1{
+        if let Some(typename) = maybetypename{
             
-            colour = (255,255,255);
-            texturename = "pieceart/".to_string() + &typename ;
-        }
-        else if ownerid == 2{
+            if ownerid == 1{
             
-            colour = (255,255,255);
-            texturename = "pieceart/b_".to_string() + &typename;
-        }
-        else{
-            
-            colour = (255,5,255);
-            texturename = "pieceart/".to_string() + &typename ;
-        }
-        
-        
-        let mut toadd = AppearanceData::default_object( objectname, position, rotation);
-        
-        toadd.set_colour( colour );
-        toadd.set_image( texturename );
-        
-        if typename == "poolball"{
-            toadd.set_sphere(0.7);
-            //toadd.set_image("pieceart/poolball.png".to_string());
-        }
-        else{            
-            toadd.set_cylinder( (0.5, 0.7) );
+                colour = (255,255,255);
+                texturename = "pieceart/".to_string() + &typename ;
+            }
+            else if ownerid == 2{
+                
+                colour = (255,255,255);
+                texturename = "pieceart/b_".to_string() + &typename;
+            }
+            else{
+                
+                colour = (255,5,255);
+                texturename = "pieceart/".to_string() + &typename ;
+            }
+
+            toadd.set_image( texturename );
+            toadd.set_colour( colour );
         }
         
+        
+
+        toadd.set_cylinder( (0.5, 0.7) );
         
         self.objects.push(toadd);
     }
@@ -449,15 +435,11 @@ pub struct AppearanceData{
     position: (f32,f32,f32),
     rotation: (f32,f32,f32),
     
-    
-    
     //the shape
     shapetype: Option<ShapeType>,
     
     //the texture
     texture: Option<Texture>,
-    
-    
 }
 
 
@@ -565,10 +547,8 @@ impl AppearanceData{
     }
     
     fn add_text(&mut self, text: String, position: (f32,f32), fontsize: u32){
-        //this overrides any texture set for whatever reason
         
-        //toadd.add_text( "Pawns Arent".to_string(), (0.0,35.0) , 30 );
-        //toadd.add_text( "Promoted".to_string(), (0.0,70.0) , 35 );
+        //this overrides any texture set for whatever reason
         
         
         
@@ -628,18 +608,6 @@ impl AppearanceData{
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 //#[serde(tag = "type")]
 pub enum ShapeType{
@@ -679,11 +647,7 @@ impl  Texture{
             image: None,
             texts: Vec::new(),
         }
-        
-        
     }
-    
-    
 }
 
 
@@ -699,41 +663,3 @@ struct Text{
     xsize: f32,
     ysize: f32,
 }
-
-
-
-
-
-
-
-
-
-
-
-/*
-else if let GameEffect::RaisedSquares(number) = gameeffect{
-    
-    let firstline = format!("{:?}", number);
-    
-    toadd.add_text(firstline, (0.0,70.0), 60);
-    toadd.add_text("raised".to_string(), (0.0,100.0), 25);
-    toadd.add_text("squares".to_string(), (0.0,130.0), 25);
-}
-else if let GameEffect::RemovedSquares(number) = gameeffect{
-    
-    let firstline = format!("{:?}", number);
-    
-    toadd.add_text(firstline, (0.0,70.0), 60);
-    toadd.add_text("removed".to_string(), (0.0,100.0), 25);
-    toadd.add_text("squares".to_string(), (0.0,130.0), 25);
-}
-else if let GameEffect::TurnsTimed(ticks) = gameeffect{
-    
-    let seconds = ticks / 60;
-    let text = format!("Turns Are");
-    let text2 = format!("{:?} seconds", seconds);
-    
-    toadd.add_text( text, (0.0,35.0) , 35 );
-    toadd.add_text( text2, (0.0,70.0) , 35 );   
-}
-*/

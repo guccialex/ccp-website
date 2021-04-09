@@ -1,24 +1,11 @@
-
-
-
-use physicsengine::PlayerInput;
-
-
 use std::collections::HashMap;
 
+use physicsengine::PlayerInput;
 use physicsengine::MainGame;
-
-use physicsengine::PieceAction;
-
 use physicsengine::VisibleGameObjectType;
-//use std::collections::HashSet;
-
-use physicsengine::GameEffects;
-
 
 
 mod appearancestate;
-
 
 use appearancestate::FullAppearanceState;
 use appearancestate::AppearanceData;
@@ -26,23 +13,16 @@ use appearancestate::AppearanceData;
 use super::ObjectType;
 pub use super::ClientState;
 
-use std::collections::HashSet;
-
 
 
 //the interface the "fullgame" has with the rust chesscheckers game
 pub struct LocalGameInterface{
-    
     
     //the id of the player
     playerid: u8,
     
     //the actual rust game
     thegame: MainGame,
-    
-    
-    //the appearance of each 
-    prevvisiblegameobject: HashMap< ObjectType, VisibleGameObjectType>,
     
     
     //if they have the same mesh or texture as before, remove its
@@ -64,26 +44,17 @@ impl LocalGameInterface{
             playerid: playerid,
             thegame:thegame,
             
-            prevvisiblegameobject: HashMap::new(),
-            
             prevappearance: HashMap::new(),
         }
     }
     
-    
     //tick the local game
     pub fn tick(&mut self) {
-        
-        
-        //let stringstate = self.thegame.get_string_state();
-        //panic!("the strinsgttate {:?}", stringstate);
-        //self.thegame.set_string_state(stringstate);
-        
         
         self.thegame.tick();
     }
     
-    
+    //set the state of the game according to what was received
     pub fn receive_game_update(&mut self, stringstate: String){
         
         if let Ok(_) = self.thegame.set_string_state(stringstate.clone()){
@@ -98,57 +69,38 @@ impl LocalGameInterface{
     
     
     
-    
-    
-    
-    
-    
     //inputs:
     
     
     //given the id of an main object, and then an object that its trying to perform an action on
     //return if an input was sent to the game, and if it was, what the serialized string of it is
     pub fn try_to_perform_action(&mut self, object1: ObjectType, object2: ObjectType) -> Option<String>{
-        
-        
-        
+
         let objecttoinput = self.get_inputs_of_object(object1);
         
         //if there is a player input that lets object1 perform some action on object 2
         if let Some(playerinput) = objecttoinput.get(&object2){
             
             //panic!( "input sent {:?}", playerinput.clone()  );
-            
             return self.try_to_perform_input( playerinput.clone() );
         };
-        
         
         //otherwise do nothing and return false
         return None;
     }
-    pub fn try_to_flick_piece(&mut self, pieceid: u16, direction: f32, force: f32 ) -> Option<String>{
-        
-        let flickaction = PieceAction::flick(direction, force.sqrt() * 3.0);
-        let flickinput = PlayerInput::pieceaction(pieceid, flickaction);
-        
-        //give the flick input to the game
-        return self.try_to_perform_input(flickinput);
-        
-    }
+
+
     pub fn try_to_draw_card(&mut self) -> Option<String>{
         
         let input = PlayerInput::drawcard;
         
         return self.try_to_perform_input(input);
-        
     }
-    
     
     
     fn try_to_perform_input(&mut self, playerinput: PlayerInput) -> Option<String>{
         
         //give the flick input to the game
-        
         if let Some(validinput) = self.thegame.receive_input(self.playerid, playerinput.clone()){
             
             return Some(validinput);
@@ -156,13 +108,78 @@ impl LocalGameInterface{
         else{
             return None;
         }
-        
     }
     
     
     
+    //if this object selectable by me
+    pub fn is_object_selectable(&self, object: ObjectType) -> bool{
+        
+        if let ObjectType::object(objectid) = object{
+            
+            if self.thegame.is_object_selectable( &self.playerid, &objectid){ 
+                return true;
+            }
+        };
+        return false;
+    }
     
     
+
+    
+    //get the id of every object that this object targets
+    fn objects_this_object_can_select(&self, objectid: ObjectType) -> Vec<ObjectType>{
+        
+        let objecttoinput = self.get_inputs_of_object(objectid);
+        
+        let mut toreturn = Vec::new();
+        
+        for (objectid, _) in objecttoinput{
+            toreturn.push(objectid);
+        };
+        
+        toreturn
+    }
+
+    
+    
+    
+    //gets a map of every valid player input for this given object
+    //mapped by the id of the object that needs to be clicked on for it to be performed
+    fn get_inputs_of_object(&self, objectid: ObjectType) -> HashMap< ObjectType, PlayerInput >{
+        
+        let mut toreturn = HashMap::new();
+        
+        
+        //if the object is a board object
+        if let ObjectType::object(objectid) = objectid{
+            
+            //get the actions allowed by the piece
+            let actionsandtargets = self.thegame.get_actions_allowed_by_piece(objectid);
+
+            //for every action allowed, get the objectid of the board square and the piece id associated it can capture
+            for (action, targetids) in actionsandtargets.1{
+                
+                let input = PlayerInput::pieceaction(objectid, action);
+                
+                //for every object id
+                for targetid in targetids{
+                    
+                    let objecttype;
+                    
+                    objecttype = ObjectType::object(targetid);
+                    
+                    toreturn.insert( objecttype, input.clone() );
+                }
+            }
+        }
+        
+        toreturn
+    }
+    
+    
+
+
     
     pub fn get_full_appearance_state(&mut self, clientstate: &ClientState) -> FullAppearanceState{
         
@@ -179,8 +196,8 @@ impl LocalGameInterface{
         
         toreturn.new_deck( ccpgamestate.turnsuntildrawavailable);
         
-        toreturn.new_timer( 1, ccpgamestate.player1totalticksleft, ccpgamestate.playerswithactiveturns.contains(&1) );
-        toreturn.new_timer( 2, ccpgamestate.player2totalticksleft, ccpgamestate.playerswithactiveturns.contains(&2) );
+        toreturn.new_timer( 1, ccpgamestate.player1totalticksleft, ccpgamestate.playerswithactiveturns.get(&1).copied() );
+        toreturn.new_timer( 2, ccpgamestate.player2totalticksleft, ccpgamestate.playerswithactiveturns.get(&2).copied() );
         
         
         
@@ -188,51 +205,36 @@ impl LocalGameInterface{
         
         for boardgameobject in &ccpgamestate.boardobjects{
             
-            let gameobjectid;
             
-            //if the texture is the same as the last
+            let gameobjectid = boardgameobject.id;
+
+            let gameobjectname = ObjectType::object(gameobjectid).to_objectname();
             
-            if let physicsengine::VisibleGameObjectType::Piece(_) = &boardgameobject.objecttype{
-                gameobjectid = ObjectType::piece( boardgameobject.id );            
+            let mut rotation = boardgameobject.rotation;
+            let position = boardgameobject.position;
+
+            let owner = boardgameobject.owner;
+
+            let texturelocation = boardgameobject.texturelocation.clone();
+
+                
+            //if its from player 2's perspective, rotate each piece 180 degrees 
+            //and rotate each card by 180 degrees
+            if self.playerid == 2{
+                //i need to rotate around the objects z axis, not around the world's z axis
+                //right now im just rotating around the worlds z axis but i should change that
+                rotation = (boardgameobject.rotation.0 , boardgameobject.rotation.1 + 3.1416, boardgameobject.rotation.2);
             }
-            else if let physicsengine::VisibleGameObjectType::Square(_) = &boardgameobject.objecttype{
-                gameobjectid = ObjectType::boardsquare( boardgameobject.id );
+            
+            
+            if  VisibleGameObjectType::Piece == boardgameobject.objecttype{
+
+                toreturn.new_piece( gameobjectname.clone(), texturelocation, position, rotation, owner.unwrap() );
             }
-            else{
-                panic!("not a piece or square. huh?");
+            else if let VisibleGameObjectType::Square(iswhite) = boardgameobject.objecttype{
+
+                toreturn.new_boardsquare( gameobjectname.clone(), position, rotation, iswhite );
             }
-            
-            
-            let gameobjectname = gameobjectid.to_objectname();
-            
-            
-            
-            if let physicsengine::VisibleGameObjectType::Piece(pieceobject) = &boardgameobject.objecttype{
-                
-                
-                let rotation;
-                
-                //if its from player 2's perspective, rotate each piece 180 degrees 
-                //and rotate each card by 180 degrees
-                if self.playerid == 2{
-                    //i need to rotate around the objects z axis, not around the world's z axis
-                    //right now im just rotating around the worlds z axis but i should change that
-                    rotation = (boardgameobject.rotation.0 , boardgameobject.rotation.1 + 3.1416, boardgameobject.rotation.2);
-                }
-                else{
-                    rotation = boardgameobject.rotation;
-                }
-                
-                
-                toreturn.new_piece( gameobjectname.clone(), pieceobject.typename.clone(), boardgameobject.position, rotation, pieceobject.owner );
-                
-                
-                
-            }
-            else if let physicsengine::VisibleGameObjectType::Square(squareobject) = &boardgameobject.objecttype{
-                
-                toreturn.new_boardsquare( gameobjectname.clone(), boardgameobject.position, boardgameobject.rotation, squareobject.iswhite );
-            };
             
             
             //tint every object on a mission blue
@@ -242,36 +244,8 @@ impl LocalGameInterface{
                 toreturn.tint_object_colour(gameobjectname, (250, 0, 250), 0.4);
             }
             
-            
         };
         
-        
-        
-        //if theres an object being dragged
-        //add the drag indicator to be drawn
-        if let Some(dragged) = &clientstate.dragged{
-            
-            
-            //if there is a selectedobject and it is a piece
-            if let Some( ObjectType::piece(pieceid) ) = clientstate.selectedobject{
-                
-                let (reldistx, reldisty) = dragged.relativepos;
-                
-                //get the position of the selected piece
-                
-                if let Some( (xpos, zpos) ) = ccpgamestate.get_piece_plane_position( pieceid ){
-                    
-                    //get the position and rotation of the cue
-                    let (position, rotation) = get_position_and_rotation_of_cue_indicator( (xpos, zpos) , reldistx, reldisty);
-                    
-                    //add the cue to the objects to be rendered
-                    toreturn.new_cue(position, rotation);
-                    
-                    
-                };
-                
-            }
-        }
         
         
         
@@ -281,14 +255,18 @@ impl LocalGameInterface{
             //make the selected game object yellow
             toreturn.set_gameobject_colour( selectedgameobject.to_objectname(), (10,10,254) );
             
-            let highlightedobjects = self.get_this_objects_selectable_objects(selectedgameobject);
+            let highlightedobjects = self.objects_this_object_can_select(selectedgameobject);
             
             //make those highlighted objects green
-            for highlightedobject in highlightedobjects{
+            for highlightedobject in highlightedobjects.clone(){
+
+                //panic!("highlighted objects {:?}", highlightedobjects);
                 
                 let highlightedobjectname = highlightedobject.to_objectname();
-                //toreturn.set_gameobject_colour(highlightedobjectname, (0,255,0));
                 toreturn.tint_object_colour(highlightedobjectname, (0,255,0), 0.65);
+
+                //toreturn.set_gameobject_colour(highlightedobjectname, (0,255,0));
+                
             }
         }
         
@@ -304,7 +282,6 @@ impl LocalGameInterface{
         if let Some( effect ) = &ccpgamestate.lastcardeffect{
             
             toreturn.new_card_effect_display(effect);
-            
         }
         
         
@@ -316,193 +293,9 @@ impl LocalGameInterface{
     }
     
     
-    
-    
-    
-    
-    //if this object selectable by me
-    pub fn is_object_selectable(&self, object: ObjectType) -> bool{
-        
-        if let ObjectType::piece(pieceid) = object{
-            
-            let owner = self.thegame.get_board_game_object_owner(pieceid);
-            
-            if owner == Some(self.playerid){
-                
-                return true;
-            }
-            
-        };
-        
-        return false;
-    }
-    
-    
-    //return if the object can be dragged by the player
-    pub fn can_object_be_dragged(&self, object: ObjectType) -> bool{
-        
-        true
-    }
-    
-    
-    
-
-    
-    
-    
-    //gets a map of every valid player input for this given object
-    //mapped by the id of the object that needs to be clicked on for it to be performed
-    fn get_inputs_of_object(&self, objectid: ObjectType) -> HashMap< ObjectType, PlayerInput >{
-        
-        let mut toreturn = HashMap::new();
-        
-        
-        //if the object is a piece
-        if let ObjectType::piece(pieceid) = objectid{
-            
-            //get the actions allowed by the piece
-            let actionsandobjects = self.thegame.get_actions_allowed_by_piece(pieceid);
-            
-            //panic!("actions allowed {:?}", actionsandobjects);
-            
-            //for every action allowed, get the objectid of the board square and the piece id associated it can capture
-            for (action, objectids) in actionsandobjects.1{
-                
-                let input = PlayerInput::pieceaction(pieceid, action);
-                
-                //for every object id
-                for objectid in objectids{
-                    
-                    let objecttype;
-                    
-                    //if the object is a piece
-                    if self.thegame.is_board_game_object_piece(objectid){
-                        
-                        objecttype = ObjectType::piece(objectid);
-                    }
-                    else if self.thegame.is_board_game_object_square(objectid){
-                        
-                        objecttype = ObjectType::boardsquare(objectid);
-                    }
-                    else{
-                        panic!("apparently its neither boardsquare or piece");
-                    }
-                    
-                    toreturn.insert( objecttype, input.clone() );
-                }
-                
-            }
-            
-        }
-        //if the object is a board square
-        else if let ObjectType::boardsquare(id) = objectid{
-            
-            //dont do anything to fill the list to return
-            //because no actions can be performed by a board square
-            
-        }
-        
-        
-        toreturn
-    }
-    
-    
-    /*
-    //returns if this piece can be flicked or not
-    fn can_piece_be_flicked(&self, pieceid: u16) -> bool{
-        
-        //if i own this piece
-        //and its not a boardgame active
-        if self.do_i_own_object( ObjectType::piece(pieceid) ){
-            
-            return self.thegame.get_actions_allowed_by_piece(pieceid).0;
-        }
-        
-        return false;
-    }
-    */
-    
-    
-    
-    
-    //returns whether this object exists in the game
-    fn does_object_still_exist(&self, object: ObjectType) -> bool{
-        
-        if let ObjectType::piece(pieceid) = object{
-            if self.thegame.get_board_game_object_ids().contains(&pieceid){
-                return true;
-            }
-            else{
-                return false;
-            }
-        }
-        else{
-            return true ;
-        };
-    }
-    
-    
-    
-    
-    fn get_this_objects_selectable_objects(&self, objectid: ObjectType) -> Vec<ObjectType>{
-        
-        let objecttoinput = self.get_inputs_of_object(objectid);
-        
-        let mut toreturn = Vec::new();
-        
-        for (objectid, input) in objecttoinput{
-            toreturn.push(objectid);
-        };
-        
-        toreturn
-    }
-    
-    
-    
 }
 
 
 
 
 
-
-
-
-fn get_position_and_rotation_of_cue_indicator(piecepos: (f32,f32), reldistx: f32, reldisty: f32) -> ((f32,f32,f32), (f32,f32,f32)){
-    
-    //the distance plus the length of half the cue
-    let curtotaldistance = (reldistx * reldistx + reldisty * reldisty).sqrt();
-    
-    //if the distance of the que is farther or closer than it should be, change the scalar to render it within range
-    let mut distancescalar = 1.0;
-    
-    //if the distance of the que is less than 2 units away from the piece, make it two units away
-    if curtotaldistance <= 1.0{
-        distancescalar = 1.0 / curtotaldistance ;
-    }
-    
-    
-    //0 + the ratio of the hypotenuse length to x length * cue length
-    let xcuedistance = (reldistx / curtotaldistance ) * 1.0 ;
-    //0 + the ratio of the hypotenuse length to y length * cue length
-    let ycuedistance = (reldisty / curtotaldistance ) * 1.0 ;
-    
-    
-    //i want it to circle around the selected pieces position
-    //facing inwards
-    
-    let xdistancefromselected = (reldistx * distancescalar) + xcuedistance;
-    let zdistancefromselected = (reldisty * distancescalar) + ycuedistance;
-    
-    let xrotation = reldistx.atan2(reldisty);
-    
-    
-    
-    let position = (piecepos.0 + xdistancefromselected, 0.8, piecepos.1 + zdistancefromselected);
-    let rotation = (0.0, xrotation, 0.0);
-    
-    
-    
-    return (position, rotation) ;
-    
-}

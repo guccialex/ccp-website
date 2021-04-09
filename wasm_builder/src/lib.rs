@@ -188,10 +188,7 @@ impl FullGame{
                 if selectedobject == pickedobject{
                     
                     //if that object can be dragged
-                    
-                    if self.localgame.can_object_be_dragged(selectedobject){
-                        return true;
-                    }
+                    return false;
                 }
             }
         }
@@ -265,54 +262,12 @@ impl FullGame{
     //and how far its being dragged
     pub fn drag_selected_object(&mut self, relativedistancex: f32, relativedistancey: f32, objectovername: String ){
         
-        
-        //if an object is selected
-        if let Some(selectedobject) = self.clientstate.selectedobject{
-            
-            //if the selected object can be dragged
-            if self.localgame.can_object_be_dragged(selectedobject){
-                
-                
-                let objectover = ObjectType::from_objectname(objectovername);
-
-                self.clientstate.dragged = Some( Dragged{
-                   relativepos: (relativedistancex, relativedistancey),
-                   objectover: objectover,
-                });
-            }            
-        }
     }
     
     
     //the mouse is raised
     pub fn mouse_up(&mut self){
         
-        //if the selected object is being dragged
-        if let Some( dragged ) = &self.clientstate.dragged {
-
-            let (relativex, relativey) = dragged.relativepos;
-            
-            //if there is a selected object and it is a piece
-            if let Some( ObjectType::piece(pieceid) ) = self.clientstate.selectedobject{
-                
-                //if the distance its dragged is enough to flick, flick the object and set selected object to none
-                if let Some( (forcex, forcey) ) = get_flick_force(relativex, relativey){
-
-                    //try to flick that piece
-                    if let Some(input) = self.localgame.try_to_flick_piece(pieceid, forcex, forcey){
-
-                        self.queuedoutgoingsocketmessages.push(input);
-
-                        //unselect the selected object if it is set to be flicked
-                        self.clientstate.selectedobject = None;
-                    };
-                };
-            };
-        };
-        
-        
-        //clear the object being dragged
-        self.clientstate.dragged = None;
     }
     
 }
@@ -352,9 +307,6 @@ fn get_flick_force(relativedistancex: f32, relativedistancey: f32) -> Option<(f3
     
     
     return None;
-    
-    
-    
 }
 
 
@@ -374,11 +326,8 @@ fn get_flick_force(relativedistancex: f32, relativedistancey: f32) -> Option<(f3
 #[derive(PartialEq, Copy, Clone, Hash, Eq, Debug)]
 pub enum ObjectType{
     
-    boardsquare(u16),
-    piece(u16),
-    
+    object(u16),
     deck,
-    
 }
 
 
@@ -388,14 +337,9 @@ impl ObjectType{
     //turn self into the name of the object
     pub fn to_objectname(&self) -> String {
         
-        if let ObjectType::piece(pieceid) = self{
+        if let ObjectType::object(id) = self{
             
-            let toreturn = "P".to_string() + &pieceid.to_string();
-            return toreturn ;
-        }
-        else if let ObjectType::boardsquare(boardsquareid) = self{
-            
-            let toreturn = "B".to_string() + &boardsquareid.to_string();
+            let toreturn = "K".to_string() + &id.to_string();
             return toreturn ;
         }
         else if let ObjectType::deck = self{
@@ -413,24 +357,13 @@ impl ObjectType{
         if objectname == "deck"{
             return Some( ObjectType::deck  );
         }
-        //if the first character of the objects name is "P"
-        else if objectname.chars().nth(0).unwrap() == 'P'{
+        //if the first character of the objects name is "K"
+        else if objectname.chars().nth(0).unwrap() == 'K'{
             
             //get the rest of the name and try to convert it to an int
-            let stringpieceid = objectname[1..].to_string();
-            let intpieceid = stringpieceid.parse::<u16>().unwrap();
-            let toreturn = ObjectType::piece(intpieceid);
-            
-            return Some (toreturn);
-            
-        }
-        //if the first character of the objects name is "B"
-        else if objectname.chars().nth(0).unwrap() == 'B'{
-            
-            //get the rest of the name and try to convert it to an int
-            let bsid = objectname[1..].to_string();
-            let intbsid = bsid.parse::<u16>().unwrap();
-            let toreturn = ObjectType::boardsquare(intbsid);
+            let id = objectname[1..].to_string();
+            let intid = id.parse::<u16>().unwrap();
+            let toreturn = ObjectType::object(intid);
             
             return Some (toreturn);
         }
