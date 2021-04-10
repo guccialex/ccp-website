@@ -65,12 +65,8 @@ struct Dragged{
 pub struct ClientState{
     //the name of the object that is selected
     selectedobject: Option<ObjectType>,
-    
-    dragged: Option<Dragged>,
-    
-    //the pieces and values of each put up to offer
-    //for either a need to raise, check, or settle the debt
-    piecesforoffer: HashSet<u16>,
+
+    waitingforopponent: bool,
 }
 
 impl ClientState{
@@ -81,12 +77,16 @@ impl ClientState{
         ClientState{
             
             selectedobject: None,
-            dragged: None,    
-            piecesforoffer: HashSet::new(),
+
+            waitingforopponent: true,
         }
-        
     }
-    
+
+
+    fn opponent_connected(&mut self){
+
+        self.waitingforopponent = false;
+    } 
     
 }
 
@@ -105,6 +105,7 @@ pub struct FullGame{
     queuedoutgoingsocketmessages: Vec<String>,
     
     clientstate: ClientState,
+
 }
 
 
@@ -116,11 +117,23 @@ pub struct FullGame{
 impl FullGame{
 
     
-    pub fn new(playerid: u8) -> FullGame{
+    pub fn new(playerid: u8, offlinegame: bool) -> FullGame{
         
         //set the panic hook so i get real error reporting
         //panic::set_hook( Box::new(console_error_panic_hook::hook) );
         console_error_panic_hook::set_once();
+
+        let mut clientstate;
+
+        if offlinegame == true{
+
+            clientstate = ClientState::new();
+            clientstate.opponent_connected();
+        }
+        else{
+            clientstate = ClientState::new();
+        }
+
 
         
         FullGame{
@@ -129,7 +142,7 @@ impl FullGame{
             
             queuedoutgoingsocketmessages: Vec::new(),
             
-            clientstate: ClientState::new(),
+            clientstate: clientstate,
         }
         
     }
@@ -141,6 +154,8 @@ impl FullGame{
     pub fn get_incoming_socket_message(&mut self, message: String){
         
         self.localgame.receive_game_update( message );
+
+        self.clientstate.opponent_connected();
     }
     
     //if there is an outgoing socket message to pop
@@ -167,7 +182,7 @@ impl FullGame{
         
         //use the interface and the the client state to get the appearance of the game
         //and return it as a javascript object to the client
-        let mut toreturn = self.localgame.get_full_appearance_state( &self.clientstate );
+        let toreturn = self.localgame.get_full_appearance_state( &self.clientstate );
         
         
         //turn it into a json object and return as a jsvalue
@@ -278,36 +293,6 @@ impl FullGame{
 
 
 
-
-//return the distance from the piece
-//and the rotation relative to the piece
-//if its been dragged far enough to flick
-fn get_flick_force(relativedistancex: f32, relativedistancey: f32) -> Option<(f32, f32)>{
-    
-    //the distance plus the length of half the cue
-    let curtotaldistance = (relativedistancex * relativedistancex + relativedistancey * relativedistancey).sqrt();
-    
-    //if the distance of the que is farther or closer than it should be, change the scalar to render it within range
-    let mut distancescalar = 1.0;
-    
-    //if the distance of the que is less than 2 units away from the piece, make it two units away
-    if curtotaldistance <= 1.0{
-        distancescalar = 1.0 / curtotaldistance ;
-    }
-    
-    
-    let xrotation = relativedistancex.atan2(relativedistancey);
-    
-    
-    if curtotaldistance >= 1.0{
-        
-        return Some( (-xrotation - (3.14159 / 2.0), (curtotaldistance - 1.0) * 1.0) );
-        
-    };
-    
-    
-    return None;
-}
 
 
 

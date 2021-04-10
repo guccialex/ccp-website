@@ -58,6 +58,12 @@ impl FullAppearanceState{
     pub fn player_won(&mut self, playerid: u8){
         self.winningplayer = Some(playerid);
     }
+
+
+    pub fn waiting_for_opponent(&mut self){
+
+        self.set_overlay( "effectcards/waitingforopponent.png".to_string() , 0.15, (0.0, 0.0) );
+    }
     
     
 }

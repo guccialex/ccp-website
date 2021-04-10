@@ -138,28 +138,34 @@ async function start(socket, playerid){
     canvas.style.height = '100%';
     
     console.log("started");
+
     
-    let mygame = new GameInterface(engine, socket, playerid);
     
-    
+    let wasmgame;
     
     //if its being started with a socket, and connected to the server
     if (socket != null){
         
         //create an event listener that when a message is received, it is sent to the game
         mygame.socket.onmessage = function (event) {
-
             
             console.log("got message from client");
             
             mygame.get_message(event.data);
         };
+
+        wasmgame = FullGame.new(playerid, false);
     }
     else{
 
+        wasmgame = FullGame.new(playerid, true);
+
         alert("youre playing in the debugging mode");
     }
+
+
     
+    let mygame = new GameInterface(wasmgame, engine, socket, playerid);
     
     
     //run the game
@@ -197,13 +203,6 @@ async function rungame(thegame) {
     
 
     setInterval( function(){ thegame.tick(); }, 1000/30 );
-    
-    //run the tick function of the game 30 times per second
-    /*
-    thegame.gameappearance.engine.runRenderLoop(function () {
-        thegame.tick();
-    });
-    */
     
 }
 
@@ -280,10 +279,6 @@ class GameApperance{
         let canvas = engine.getRenderingCanvas();
         
         
-        
-        
-        
-        
         camera.attachControl(canvas, true);
         camera.inputs.attached["mousewheel"].wheelPrecision = 10;
         camera.inputs.attached.keyboard.detachControl();
@@ -294,9 +289,6 @@ class GameApperance{
         light.diffuse = new BABYLON.Color3(1.0, 1.0, 1.0);
         light.specular = new BABYLON.Color3(0.0, 0.0, 0.0);
         light.intensity = 1.5;
-        
-        //var light = new BABYLON.DirectionalLight("DirectionalLight", new BABYLON.Vector3(0, -1, 0), scene);
-        //light.intensity = 0.5;
         
         
         this.advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
@@ -330,25 +322,11 @@ class GameApperance{
         skybox.material = skyboxMaterial;
         
         
-        //this.scene.freezeActiveMeshes();
-        
         
         
         this.removedoverlay = false;
         
-        
-        
-        /*
-        let eemg = new BABYLON.GUI.Image("thing", "effectcards/test.png");
-        eemg.width = 0.2;
-        eemg.height = 0.2;
-        
-        
-        eemg.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
-        eemg.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
-        
-        this.advancedTexture.addControl(eemg);
-        */
+
         
         
         
@@ -737,7 +715,7 @@ class GameInterface{
     
     
     
-    constructor(engine, socket, playerid){
+    constructor(wasmgame, engine, socket, playerid){
         
         
         //create the "appearance" object for this game, giving it the scene of the engine
@@ -746,7 +724,7 @@ class GameInterface{
         this.socket = socket;
         
         //create the wasm game
-        this.wasmgame = FullGame.new(playerid);
+        this.wasmgame = wasmgame;
         
         
         //if an object is being dragged (if the camera movement is disabled)

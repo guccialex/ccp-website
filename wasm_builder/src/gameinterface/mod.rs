@@ -192,6 +192,7 @@ impl LocalGameInterface{
         if let Some(winner) = ccpgamestate.isgameover{
             toreturn.player_won(winner);
         }
+
         
         
         toreturn.new_deck( ccpgamestate.turnsuntildrawavailable);
@@ -260,16 +261,18 @@ impl LocalGameInterface{
             //make those highlighted objects green
             for highlightedobject in highlightedobjects.clone(){
 
-                //panic!("highlighted objects {:?}", highlightedobjects);
                 
                 let highlightedobjectname = highlightedobject.to_objectname();
                 toreturn.tint_object_colour(highlightedobjectname, (0,255,0), 0.65);
 
                 //toreturn.set_gameobject_colour(highlightedobjectname, (0,255,0));
-                
             }
         }
         
+
+
+
+
         
         
         toreturn.new_game_effects( &ccpgamestate.gameeffects, &self.playerid );
@@ -285,6 +288,15 @@ impl LocalGameInterface{
         }
         
         
+
+        
+        //if waiting for opponent
+        if clientstate.waitingforopponent{
+
+            toreturn.waiting_for_opponent();
+        }
+        
+
         
         
         self.prevappearance = toreturn.remove_unchanged_shapes_and_textures( &self.prevappearance );
