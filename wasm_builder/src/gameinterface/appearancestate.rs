@@ -49,11 +49,6 @@ impl FullAppearanceState{
         }   
     }
     
-    fn add_object(&mut self, objectappearance: AppearanceData){
-        
-        self.objects.push(objectappearance);
-    }
-    
     
     pub fn player_won(&mut self, playerid: u8){
         self.winningplayer = Some(playerid);
