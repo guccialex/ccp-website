@@ -76,7 +76,7 @@ async function run(websocketaddress, gamepassword) {
         
         //if its a message that im connected to the game
         if (event.data == "connected to game as player 1"){
-
+            
             console.log("GAME STARTING");
             
             //remove the "onmessage "event listener
@@ -87,7 +87,7 @@ async function run(websocketaddress, gamepassword) {
         }
         //if its a message that im connected to the game
         else if (event.data == "connected to game as player 2"){
-
+            
             console.log("GAME STARTING");
             
             //remove the "onmessage "event listener
@@ -127,7 +127,7 @@ async function start(socket, playerid){
     
     //canvas.style.width = "800px";
     //canvas.style.height = "400px"; 
-
+    
     let options = {
         //timeStep : 1000/10,
     };
@@ -138,10 +138,27 @@ async function start(socket, playerid){
     canvas.style.height = '100%';
     
     console.log("started");
-
+    
     
     
     let wasmgame;
+    
+    //if its being started with a socket, and connected to the server
+    if (socket != null){
+        
+        wasmgame = FullGame.new(playerid, false);
+    }
+    else{
+        
+        wasmgame = FullGame.new(playerid, true);
+        
+        alert("youre playing in the debugging mode");
+    }
+    
+    
+    
+    let mygame = new GameInterface(wasmgame, engine, socket, playerid);
+    
     
     //if its being started with a socket, and connected to the server
     if (socket != null){
@@ -153,20 +170,8 @@ async function start(socket, playerid){
             
             mygame.get_message(event.data);
         };
-
-        wasmgame = FullGame.new(playerid, false);
-    }
-    else{
-
-        wasmgame = FullGame.new(playerid, true);
-
-        alert("youre playing in the debugging mode");
     }
 
-
-    
-    let mygame = new GameInterface(wasmgame, engine, socket, playerid);
-    
     
     //run the game
     rungame(mygame);
@@ -201,7 +206,7 @@ async function rungame(thegame) {
         thegame.mousemove();
     });
     
-
+    
     setInterval( function(){ thegame.tick(); }, 1000/30 );
     
 }
@@ -239,7 +244,7 @@ async function rungame(thegame) {
 class GameApperance{
     
     constructor(engine, gameinterface, playerid){
-
+        
         window.addEventListener("resize", function () { // Watch for browser/canvas resize events
             engine.resize();
         });
@@ -252,7 +257,7 @@ class GameApperance{
         
         // This creates and positions a free camera (non-mesh)
         let camera = new BABYLON.ArcRotateCamera("camera1", 0, 0, 0, new BABYLON.Vector3(0.0,2.0,0.0), scene);
-
+        
         //camera.fov = camera.fov*1.5;
         
         //set the position of the camera, not its target tho
@@ -326,7 +331,7 @@ class GameApperance{
         
         this.removedoverlay = false;
         
-
+        
         
         
         
@@ -368,7 +373,7 @@ class GameApperance{
                 
                 //remove it
                 if (this.imageoverlay != null){
-
+                    
                     this.imageoverlay.dispose();
                     this.imageoverlay = null;
                 }
@@ -382,13 +387,13 @@ class GameApperance{
                 
                 
                 this.imageoverlay = new BABYLON.GUI.Image(image, image);
-
+                
                 this.imageoverlay.width = scale;
                 //this.imageoverlay.height = scale/2;
-
+                
                 this.imageoverlay.stretch = BABYLON.GUI.Image.STRETCH_UNIFORM;
-
-
+                
+                
                 //this.imageoverlay.left = "-40%";
                 this.imageoverlay.top = -scale/2;
                 
@@ -396,13 +401,13 @@ class GameApperance{
                 this.imageoverlay.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
                 
                 this.advancedTexture.addControl(this.imageoverlay);
-
+                
                 console.log("made new overlay");
                 
             }
             
         }
-
+        
         else{
             
             //remove it
@@ -669,16 +674,16 @@ class GameApperance{
             if (this.wonbutton == null){
                 
                 let text;
-
+                
                 if (this.wonbutton == 1){
                     text = "Congrats white. You Won"
                 }
                 else {
                     text = "Congrats black. You Won"
                 }
-
+                
                 var button1 = BABYLON.GUI.Button.CreateSimpleButton("wongui", text);
-
+                
                 button1.width = "550px"
                 button1.height = "200px";
                 button1.color = "white";
@@ -739,7 +744,7 @@ class GameInterface{
     
     //get a websocket message from the server
     get_message(message){
-
+        
         
         //give the received message to the game
         this.wasmgame.get_incoming_socket_message( message );
