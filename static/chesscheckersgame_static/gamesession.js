@@ -112,7 +112,7 @@ async function run_serverless() {
     
     console.log("running NOT connected to server");
     
-    start(null, 2);
+    start(null, 1);
 }
 
 
